@@ -12,7 +12,14 @@ import axios from 'axios';
  *
  * `API_ENABLED === true` means "call the real backend". Services branch on it.
  */
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Production backend. Used as a hard fallback so the deployed bundle ALWAYS
+// reaches the live API even if the Vercel build never received an env var.
+// A configured VITE_API_BASE_URL (env file or Vercel dashboard) takes priority.
+const PROD_FALLBACK_API = 'https://car-japan-motors.onrender.com';
+
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? PROD_FALLBACK_API : '');
 
 // Mock mode = dev build AND no API URL configured. Nothing else.
 export const USE_MOCK_DATA = import.meta.env.DEV && !API_BASE_URL;
