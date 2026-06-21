@@ -142,10 +142,18 @@ export async function getCars(params = {}) {
   if (API_ENABLED) {
     const { data } = await api.get('/api/cars', { params: { sold: false } });
     const cars = (data?.data || []).map(mapCarFromApi);
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.debug('[getCars] source=API count=', cars.length);
+    }
     // Apply all filtering/sorting client-side for parity with mock mode.
     return applyQuery(cars, params);
   }
   await mockDelay();
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.debug('[getCars] source=MOCK count=', CARS.length);
+  }
   return applyQuery(CARS, params);
 }
 

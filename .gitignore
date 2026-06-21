@@ -5,6 +5,9 @@ dist-ssr
 .env
 .env.*
 !.env.example
+# Production API URL is public (not a secret) and must ship with the build so
+# Vercel always points the frontend at the live backend.
+!.env.production
 .DS_Store
 *.log
 .vscode/*

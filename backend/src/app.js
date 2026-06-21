@@ -25,16 +25,23 @@ const allowedOrigins = (process.env.CLIENT_URL || '')
 
 const corsOptions = {
   origin(origin, callback) {
-    // Allow server-to-server or Postman requests
+    // Allow server-to-server / curl / Postman requests (no Origin header).
     if (!origin) return callback(null, true);
 
-    const isLocalhost =
-      origin.includes('localhost') ||
-      origin.includes('127.0.0.1');
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+
+    // Allow the Vercel production domain AND any preview deployment
+    // (e.g. car-japan-motors-git-branch-scope.vercel.app).
+    let isVercel = false;
+    try {
+      isVercel = new URL(origin).hostname.endsWith('.vercel.app');
+    } catch {
+      isVercel = false;
+    }
 
     const isAllowed = allowedOrigins.includes(origin);
 
-    if (isLocalhost || isAllowed) {
+    if (isLocalhost || isVercel || isAllowed) {
       return callback(null, true);
     }
 
