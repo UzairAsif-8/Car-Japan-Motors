@@ -13,10 +13,10 @@ export const BRAND = {
 };
 
 export const CONTACT = {
-  phone: '+92 333 4276185',
-  phoneHref: 'tel:+923334276185',
-  whatsapp: '+92 333 4276185',
-  whatsappNumber: '923334276185',
+  phone: '+92 321 9439646',
+  phoneHref: 'tel:+923219439646',
+  whatsapp: '+92 321 9439646',
+  whatsappNumber: '923219439646',
   email: 'carjapan786@gmail.com',
   emailHref: 'mailto:carjapan786@gmail.com',
   address: {
