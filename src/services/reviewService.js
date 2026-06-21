@@ -1,5 +1,4 @@
 import api, { API_ENABLED, mockDelay } from './api';
-import SEED_REVIEWS from '../data/testimonials';
 
 /**
  * Reviews / testimonials data access layer.
@@ -27,7 +26,9 @@ function mapReviewFromApi(r) {
   };
 }
 
-function readStore() {
+// Dev-only seed loaded via dynamic import so testimonials are statically
+// stripped from production builds.
+async function readStore() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -35,6 +36,7 @@ function readStore() {
     /* ignore malformed storage */
   }
   // First run — seed from the bundled testimonials.
+  const { default: SEED_REVIEWS } = await import('../data/testimonials');
   localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_REVIEWS));
   return [...SEED_REVIEWS];
 }
@@ -49,8 +51,11 @@ export async function getReviews() {
     const { data } = await api.get('/api/reviews');
     return (data?.data || []).map(mapReviewFromApi);
   }
-  await mockDelay(400);
-  return readStore();
+  if (import.meta.env.DEV) {
+    await mockDelay(400);
+    return readStore();
+  }
+  return [];
 }
 
 // Admin — every review regardless of status (for the admin Reviews table).
@@ -59,8 +64,11 @@ export async function getAllReviews() {
     const { data } = await api.get('/api/admin/reviews');
     return (data?.data || []).map(mapReviewFromApi);
   }
-  await mockDelay(400);
-  return readStore();
+  if (import.meta.env.DEV) {
+    await mockDelay(400);
+    return readStore();
+  }
+  return [];
 }
 
 // Admin — create a curated testimonial (published/APPROVED immediately).
@@ -75,18 +83,21 @@ export async function createReview(payload) {
     });
     return mapReviewFromApi(data?.data);
   }
-  await mockDelay(600);
-  const review = {
-    id: `rev-${Date.now()}`,
-    rating: 5,
-    avatar: '',
-    createdAt: new Date().toISOString(),
-    ...payload,
-  };
-  const reviews = readStore();
-  const next = [review, ...reviews];
-  writeStore(next);
-  return review;
+  if (import.meta.env.DEV) {
+    await mockDelay(600);
+    const review = {
+      id: `rev-${Date.now()}`,
+      rating: 5,
+      avatar: '',
+      createdAt: new Date().toISOString(),
+      ...payload,
+    };
+    const reviews = await readStore();
+    const next = [review, ...reviews];
+    writeStore(next);
+    return review;
+  }
+  throw new Error('Reviews are read-only in this environment');
 }
 
 export async function deleteReview(id) {
@@ -94,8 +105,11 @@ export async function deleteReview(id) {
     const { data } = await api.delete(`/api/admin/reviews/${id}`);
     return data;
   }
-  await mockDelay(400);
-  const next = readStore().filter((r) => r.id !== id);
-  writeStore(next);
-  return { success: true, id };
+  if (import.meta.env.DEV) {
+    await mockDelay(400);
+    const next = (await readStore()).filter((r) => r.id !== id);
+    writeStore(next);
+    return { success: true, id };
+  }
+  throw new Error('Reviews are read-only in this environment');
 }

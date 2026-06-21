@@ -69,13 +69,16 @@ export async function createInquiry(payload) {
     });
     return mapInquiryFromApi(data?.data);
   }
-  await mockDelay(900);
-  return {
-    _id: `inq-${Date.now()}`,
-    status: 'new',
-    createdAt: new Date().toISOString(),
-    ...payload,
-  };
+  if (import.meta.env.DEV) {
+    await mockDelay(900);
+    return {
+      _id: `inq-${Date.now()}`,
+      status: 'new',
+      createdAt: new Date().toISOString(),
+      ...payload,
+    };
+  }
+  throw new Error('Unable to submit inquiry right now. Please try again.');
 }
 
 export async function getInquiries() {
@@ -83,8 +86,11 @@ export async function getInquiries() {
     const { data } = await api.get('/api/admin/inquiries');
     return (data?.data || []).map(mapInquiryFromApi);
   }
-  await mockDelay();
-  return MOCK_INQUIRIES;
+  if (import.meta.env.DEV) {
+    await mockDelay();
+    return MOCK_INQUIRIES;
+  }
+  return [];
 }
 
 // Admin — persist a status change (NEW | CONTACTED | CLOSED).
@@ -95,6 +101,9 @@ export async function updateInquiryStatus(id, status) {
     });
     return mapInquiryFromApi(data?.data);
   }
-  await mockDelay(300);
-  return { _id: id, status };
+  if (import.meta.env.DEV) {
+    await mockDelay(300);
+    return { _id: id, status };
+  }
+  throw new Error('Unable to update inquiry right now. Please try again.');
 }

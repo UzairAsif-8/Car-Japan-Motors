@@ -1,5 +1,11 @@
 import api, { API_ENABLED, mockDelay } from './api';
-import CARS from '../data/cars';
+
+// Mock data is loaded ONLY in local-dev mock mode via a dynamic import, so the
+// bundled dummy vehicles are statically removed from production builds.
+async function loadMockCars() {
+  const { default: CARS } = await import('../data/cars');
+  return CARS;
+}
 
 /**
  * Vehicle data access layer.
@@ -149,12 +155,15 @@ export async function getCars(params = {}) {
     // Apply all filtering/sorting client-side for parity with mock mode.
     return applyQuery(cars, params);
   }
-  await mockDelay();
+  // Local-dev mock mode only — removed entirely from production builds.
   if (import.meta.env.DEV) {
+    const CARS = await loadMockCars();
+    await mockDelay();
     // eslint-disable-next-line no-console
     console.debug('[getCars] source=MOCK count=', CARS.length);
+    return applyQuery(CARS, params);
   }
-  return applyQuery(CARS, params);
+  return [];
 }
 
 export async function getCarById(id) {
@@ -162,10 +171,15 @@ export async function getCarById(id) {
     const { data } = await api.get(`/api/cars/${id}`);
     return mapCarFromApi(data?.data);
   }
-  await mockDelay(500);
-  const car = CARS.find((c) => c._id === id);
-  if (!car) throw new Error('Vehicle not found');
-  return car;
+  // Local-dev mock mode only — removed entirely from production builds.
+  if (import.meta.env.DEV) {
+    const CARS = await loadMockCars();
+    await mockDelay(500);
+    const car = CARS.find((c) => c._id === id);
+    if (!car) throw new Error('Vehicle not found');
+    return car;
+  }
+  throw new Error('Vehicle not found');
 }
 
 export async function getFeaturedCars(limit = 12) {
