@@ -21,12 +21,15 @@ const SIZES = {
 };
 
 const LABEL_SIZES = {
-  sm: 'text-[8px]',
-  md: 'text-[9px]',
-  lg: 'text-[11px]',
+  sm: 'text-[10px] sm:text-[11px]',
+  md: 'text-xs sm:text-sm',
+  lg: 'text-sm sm:text-base',
 };
 
-export default function Logo({ light = false, chip = false, size = 'md', className }) {
+/** Larger label styling for the main site navbar. */
+const NAV_LABEL = 'text-sm font-bold tracking-[0.12em] sm:text-base';
+
+export default function Logo({ light = false, chip = false, size = 'md', nav = false, className }) {
   const [error, setError] = useState(false);
 
   return (
@@ -61,9 +64,9 @@ export default function Logo({ light = false, chip = false, size = 'md', classNa
       )}
       <span
         className={cn(
-          'font-semibold uppercase leading-none tracking-[0.24em] whitespace-nowrap',
-          LABEL_SIZES[size],
-          light ? 'text-white/75' : 'text-ink-500'
+          'font-semibold uppercase leading-none whitespace-nowrap',
+          nav ? NAV_LABEL : cn('tracking-[0.24em]', LABEL_SIZES[size]),
+          light ? (nav ? 'text-white/95' : 'text-white/75') : 'text-ink-500'
         )}
       >
         Car Japan Motors

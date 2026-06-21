@@ -32,7 +32,7 @@ export default function Navbar() {
         )}
       >
         <div className="mx-auto flex max-w-8xl items-center justify-between container-px">
-          <Logo light={overHero} />
+          <Logo light={overHero} nav />
 
           <nav className="hidden items-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => (
