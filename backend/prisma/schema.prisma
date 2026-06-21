@@ -1,0 +1,116 @@
+// ─────────────────────────────────────────────────────────────
+// Car Japan Motors — Prisma schema
+// Single-showroom dealership. PostgreSQL (Neon) is the source of truth.
+// ─────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // `directUrl` is used for migrations against Neon (non-pooled).
+  // Set DIRECT_URL in .env; if you don't have a separate one, set it equal to DATABASE_URL.
+  directUrl = env("DIRECT_URL")
+}
+
+/// The single administrator of the showroom.
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String // bcrypt hash — never stored in plain text
+  createdAt DateTime @default(now())
+}
+
+/// A vehicle listing. Public to read; only the admin can mutate.
+model Car {
+  id               String   @id @default(cuid())
+  title            String
+  price            Int // PKR, stored as an integer
+  location         String
+  model            String
+  bodyType         String
+  registrationCity String
+  fuelType         String
+  enginePower      String
+  transmission     String
+  color            String
+  mileage          Int
+  description      String
+
+  // Added to match the frontend vehicle shape. Defaults keep the migration
+  // backward-compatible: existing rows are backfilled and the current API
+  // (which may omit these) keeps working.
+  year       Int    @default(0)
+  seats      Int    @default(5)
+  drivetrain String @default("")
+  condition  String @default("Used")
+
+  features String[] // dynamic list of feature strings
+  images   String[] // Cloudinary secure URLs only
+
+  isFeatured Boolean @default(false)
+  isSold     Boolean @default(false)
+
+  // Back-relation for inquiries placed against this car.
+  inquiries Inquiry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isFeatured])
+  @@index([isSold])
+  @@index([bodyType])
+}
+
+/// A customer review / testimonial. Public submissions start PENDING; admin-entered
+/// testimonials are created APPROVED. Shown publicly only once APPROVED.
+model Review {
+  id      String @id @default(cuid())
+  name    String
+  rating  Int // 1–5
+  comment String
+
+  // Presentation fields surfaced on the testimonials carousel.
+  role   String @default("") // e.g. "Business Owner, Lahore"
+  avatar String @default("") // optional image URL; blank → initials
+
+  status ReviewStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A lead. Created on inquiry-form submission or WhatsApp conversion click.
+model Inquiry {
+  id      String @id @default(cuid())
+  name    String
+  phone   String
+  email   String @default("") // optional; collected on the contact form
+  message String
+
+  // Optional link to the car the lead is about.
+  carId String?
+  car   Car?    @relation(fields: [carId], references: [id], onDelete: SetNull)
+
+  status InquiryStatus @default(NEW)
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([carId])
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}

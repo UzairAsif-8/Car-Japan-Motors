@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --header-height: 80px;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-white text-ink font-sans antialiased;
+    text-rendering: optimizeLegibility;
+    /* Refined OpenType: contextual alternates + proportional lining figures. */
+    font-feature-settings: 'cv11', 'ss01', 'liga' 1, 'calt' 1;
+    letter-spacing: -0.011em;
+    /* Soft ambient luxury lighting that sits behind transparent sections. */
+    background-color: #ffffff;
+    background-image: theme('backgroundImage.lux-radial');
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+
+  ::selection {
+    @apply bg-brand/15 text-ink;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+
+  /* Refined, minimal scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ink-200 rounded-full;
+    border: 2px solid #fff;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-300;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-ink;
+    font-feature-settings: 'ss01', 'cv11';
+    letter-spacing: -0.022em;
+  }
+}
+
+@layer components {
+  .container-px {
+    @apply px-5 sm:px-8 lg:px-12;
+  }
+
+  .section-py {
+    @apply py-20 sm:py-24 lg:py-32;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-brand;
+  }
+
+  .display-1 {
+    @apply font-display font-extrabold tracking-tightest leading-[0.98]
+      text-[clamp(2.6rem,7vw,5.5rem)];
+  }
+
+  .display-2 {
+    @apply font-display font-extrabold tracking-tightest leading-[1.04]
+      text-[clamp(2rem,4.5vw,3.5rem)];
+  }
+
+  .glass-nav {
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  /* Gentle, premium hover lift used across cards. Token-driven so it stays
+     consistent everywhere without altering any layout. */
+  .card-hover {
+    transition-property: transform, box-shadow, border-color;
+    transition-duration: 500ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2;
+  }
+}
+
+@layer components {
+  .range-brand {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 9999px;
+    background: theme('colors.mist.400');
+    outline: none;
+    cursor: pointer;
+  }
+  .range-brand::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 9999px;
+    background: theme('colors.brand.DEFAULT');
+    border: 4px solid #fff;
+    box-shadow: 0 2px 8px rgba(216, 30, 44, 0.4);
+    transition: transform 0.15s ease;
+  }
+  .range-brand::-webkit-slider-thumb:hover {
+    transform: scale(1.12);
+  }
+  .range-brand::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 9999px;
+    background: theme('colors.brand.DEFAULT');
+    border: 4px solid #fff;
+    box-shadow: 0 2px 8px rgba(216, 30, 44, 0.4);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .mask-fade-r {
+    -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
+    mask-image: linear-gradient(to right, black 80%, transparent 100%);
+  }
+  /* Crisp hairline divider/border that reads as premium at any DPI. */
+  .hairline {
+    @apply border border-ink-100/80;
+  }
+  /* Subtle inner highlight for layered, glassy surfaces. */
+  .inner-sheen {
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  }
+}
