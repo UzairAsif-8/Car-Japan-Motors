@@ -7,7 +7,7 @@
 export const BRAND = {
   name: 'Car Japan',
   tagline: 'Premium Japanese Vehicles, Honestly Sold',
-  established: 2009,
+  established: 2015,
   description:
     "Pakistan's trusted home for hand-selected, fully inspected Japanese vehicles.",
 };

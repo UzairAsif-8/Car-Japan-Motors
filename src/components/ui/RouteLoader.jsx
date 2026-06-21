@@ -26,7 +26,7 @@ export default function RouteLoader() {
               src="/logo.png"
               alt="Car Japan Motors"
               onError={() => setError(true)}
-              className="h-12 w-auto object-contain"
+              className="h-16 w-auto object-contain sm:h-20"
               animate={{ opacity: [0.55, 1, 0.55] }}
               transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
             />

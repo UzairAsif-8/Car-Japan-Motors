@@ -1,8 +1,11 @@
 /** Editorial / static content used across the marketing pages. */
+import { BRAND } from '../constants';
+
+const yearsTrusted = new Date().getFullYear() - BRAND.established;
 
 export const STATS = [
   { value: 4200, suffix: '+', label: 'Vehicles Delivered' },
-  { value: 16, suffix: ' yrs', label: 'Trusted Since 2009' },
+  { value: yearsTrusted, suffix: ' yrs', label: `Trusted Since ${BRAND.established}` },
   { value: 150, suffix: '-pt', label: 'Inspection Checklist' },
   { value: 98, suffix: '%', label: 'Customer Satisfaction' },
 ];
@@ -54,7 +57,7 @@ export const VALUES = [
 
 export const TIMELINE = [
   {
-    year: '2009',
+    year: '2015',
     title: 'The First Showroom',
     description:
       'Car Japan opens its doors in Lahore with a simple promise: honest vehicles, honestly sold.',

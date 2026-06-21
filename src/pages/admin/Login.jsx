@@ -40,7 +40,7 @@ export default function AdminLogin() {
       {/* Brand panel */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-ink-900 p-12 lg:flex">
         <div className="pointer-events-none absolute -right-20 top-10 h-72 w-72 rounded-full bg-brand/20 blur-3xl" />
-        <Logo light chip />
+        <Logo size="admin" chip />
         <div className="relative">
           <ShieldCheck className="h-10 w-10 text-brand-300" />
           <h1 className="mt-6 font-display text-4xl font-extrabold leading-tight text-white">
@@ -64,10 +64,10 @@ export default function AdminLogin() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="w-full max-w-sm"
         >
-          <div className="lg:hidden">
-            <Logo />
+          <div className="mb-8 flex justify-center lg:hidden">
+            <Logo size="admin" chip />
           </div>
-          <h2 className="mt-8 font-display text-3xl font-bold text-ink lg:mt-0">Welcome back</h2>
+          <h2 className="font-display text-3xl font-bold text-ink">Welcome back</h2>
           <p className="mt-2 text-ink-500">Sign in to access your dashboard.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">

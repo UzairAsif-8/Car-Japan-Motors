@@ -1,6 +1,7 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { ShieldCheck, Star, BadgeCheck } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import Typewriter from 'typewriter-effect';
+import { ShieldCheck, Star, BadgeCheck, FileCheck2 } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import Image from '../components/ui/Image';
 
@@ -11,6 +12,13 @@ const trust = [
   { icon: ShieldCheck, label: '150-Point Inspection' },
   { icon: BadgeCheck, label: 'Verified History' },
   { icon: Star, label: '4.9 / 5 Customer Rating' },
+];
+
+const TYPEWRITER_STRINGS = ['Car Japan Motors', 'The Name of Trust'];
+
+const WARRANTY_POINTS = [
+  { icon: ShieldCheck, text: '1 month engine & suspension warranty' },
+  { icon: FileCheck2, text: 'Documents warranty till registration' },
 ];
 
 export default function Hero() {
@@ -31,7 +39,7 @@ export default function Hero() {
       />
       <div className="absolute inset-0 bg-gradient-to-r from-ink-900/40 to-transparent" />
 
-      <div className="relative mx-auto w-full max-w-8xl pb-12 pt-32 container-px sm:pb-16">
+      <div className="relative mx-auto w-full max-w-8xl pb-12 pt-36 container-px sm:pb-16 sm:pt-44">
         <div className="max-w-3xl">
           <motion.span
             initial={{ opacity: 0, y: 20 }}
@@ -40,29 +48,52 @@ export default function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white backdrop-blur"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-            Premium Japanese Vehicles · Since 2009
+            Premium Japanese Vehicles · Since 2015
           </motion.span>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-6 display-1 text-white text-balance"
-          >
-            Find a car you’ll
-            <br />
-            be proud to own.
-          </motion.h1>
+          <h1 className="mt-6 min-h-[1.2em] display-1 text-balance">
+            <Typewriter
+              options={{
+                strings: TYPEWRITER_STRINGS,
+                autoStart: true,
+                loop: true,
+                delay: 48,
+                deleteSpeed: 32,
+                pauseFor: 2200,
+                cursor: '|',
+                wrapperClassName: 'hero-headline',
+                cursorClassName: 'hero-headline-cursor',
+              }}
+            />
+          </h1>
 
-          <motion.p
+          <p className="mt-4 text-[clamp(1.35rem,3.2vw,2.25rem)] font-semibold tracking-[0.06em] text-[#FFB3BE]">
+            Since 2015
+          </p>
+
+          <motion.ul
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.42 }}
-            className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl"
+            className="mt-5 flex flex-col gap-2.5 sm:gap-3"
           >
-            Hand-selected, fully inspected and honestly priced. Discover Pakistan’s
-            most trusted collection of Japanese vehicles — all in one place.
-          </motion.p>
+            {WARRANTY_POINTS.map((item, i) => (
+              <motion.li
+                key={item.text}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.65, delay: 0.48 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="inline-flex w-fit max-w-full items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 backdrop-blur-md sm:px-4 sm:py-3"
+              >
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand/20 text-brand-300 sm:h-9 sm:w-9">
+                  <item.icon className="h-4 w-4" strokeWidth={2} />
+                </span>
+                <span className="text-sm font-semibold leading-snug text-white sm:text-[0.95rem]">
+                  {item.text}
+                </span>
+              </motion.li>
+            ))}
+          </motion.ul>
         </div>
 
         <SearchBar className="mt-9 max-w-4xl" />

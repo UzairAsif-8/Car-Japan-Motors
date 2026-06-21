@@ -89,6 +89,26 @@
     -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
 
+  /* Rose-blush metallic headline — warm, luxe, on-brand with Car Japan red. */
+  .hero-headline {
+    background-image: linear-gradient(
+      125deg,
+      #ffe4e8 0%,
+      #ffb3be 20%,
+      #f06278 42%,
+      #e8455c 58%,
+      #ff9aab 78%,
+      #ffd6dc 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero-headline-cursor {
+    color: #ff9aab;
+  }
+
   /* Gentle, premium hover lift used across cards. Token-driven so it stays
      consistent everywhere without altering any layout. */
   .card-hover {

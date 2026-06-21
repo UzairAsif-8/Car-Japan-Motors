@@ -18,14 +18,16 @@ export default function AdminSidebar({ onNavigate }) {
 
   return (
     <div className="flex h-full flex-col bg-ink-900 text-white">
-      <div className="flex items-center justify-between px-6 py-6">
-        <Logo light chip size="sm" />
-        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
-          Admin
-        </span>
+      <div className="border-b border-white/10 px-5 py-6">
+        <div className="flex flex-col items-center gap-3">
+          <Logo size="admin" chip />
+          <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+            Admin Panel
+          </span>
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-2">
+      <nav className="flex-1 space-y-1 px-3 py-4">
         {ADMIN_NAV_LINKS.map((link) => {
           const Icon = ICONS[link.icon] || Circle;
           return (

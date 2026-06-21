@@ -1,122 +1,130 @@
 import { useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, Phone, MessageCircle, ArrowRight } from 'lucide-react';
-import useScrollPosition from '../hooks/useScrollPosition';
 import { NAV_LINKS, CONTACT, buildWhatsAppLink } from '../constants';
 import Logo from './ui/Logo';
 import Button from './ui/Button';
 import Drawer from './ui/Drawer';
 import { cn } from '../lib/format';
 
-export default function Navbar() {
-  const { scrolled } = useScrollPosition(40);
-  const [open, setOpen] = useState(false);
-  const { pathname } = useLocation();
+const LEFT_LINKS = NAV_LINKS.slice(0, 2);
+const RIGHT_LINKS = NAV_LINKS.slice(2);
 
-  // The home hero is dark imagery, so the nav starts transparent/light there.
-  const overHero = pathname === '/' && !scrolled;
-  const solid = !overHero;
+/** Compact nav row — logo overflows but stays vertically centered. */
+const ROW = 'h-16 lg:h-20';
+
+export default function Navbar() {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className={cn(
-          'fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-smooth',
-          solid
-            ? 'glass-nav border-b border-ink-100/70 bg-white/85 py-3'
-            : 'border-b border-transparent bg-transparent py-5'
-        )}
-      >
-        <div className="mx-auto flex max-w-8xl items-center justify-between container-px">
-          <Logo light={overHero} nav />
+      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+        <div className="relative mx-auto max-w-7xl overflow-visible rounded-2xl border border-ink-100/80 bg-white px-4 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] sm:rounded-3xl sm:px-6">
+          {/* Desktop */}
+          <div className={cn('relative hidden overflow-visible md:block', ROW)}>
+            <nav className="absolute inset-y-0 left-0 z-10 flex items-center gap-0.5">
+              {LEFT_LINKS.map((link) => (
+                <NavItem key={link.to} link={link} />
+              ))}
+            </nav>
 
-          <nav className="hidden items-center gap-1 lg:flex">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  cn(
-                    'relative rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-300',
-                    overHero
-                      ? 'text-white/80 hover:text-white'
-                      : 'text-ink-600 hover:text-ink',
-                    isActive && (overHero ? 'text-white' : 'text-ink')
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {link.label}
-                    {isActive && (
-                      <motion.span
-                        layoutId="nav-active"
-                        className={cn(
-                          'absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full',
-                          overHero ? 'bg-white' : 'bg-brand'
-                        )}
-                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                      />
-                    )}
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </nav>
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible">
+              <div className="pointer-events-auto translate-y-1.5 sm:translate-y-2">
+                <Logo size="nav" />
+              </div>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <a
-              href={CONTACT.phoneHref}
-              className={cn(
-                'hidden h-11 w-11 place-items-center rounded-full transition-colors duration-300 xl:grid focus-ring',
-                overHero
-                  ? 'text-white/85 hover:bg-white/10'
-                  : 'text-ink-600 hover:bg-ink-50'
-              )}
-              aria-label="Call us"
-            >
-              <Phone className="h-[18px] w-[18px]" />
-            </a>
-            <Button
-              href={buildWhatsAppLink()}
-              target="_blank"
-              rel="noreferrer"
-              variant={overHero ? 'light' : 'outline'}
-              size="sm"
-              icon={MessageCircle}
-              className="hidden sm:inline-flex"
-            >
-              WhatsApp
-            </Button>
-            <Button
-              to="/inventory"
-              variant={overHero ? 'light' : 'dark'}
-              size="sm"
-              iconRight={ArrowRight}
-              className="hidden sm:inline-flex"
-            >
-              Browse Inventory
-            </Button>
+            <div className="absolute inset-y-0 right-0 z-10 flex items-center gap-2 lg:gap-3">
+              <nav className="flex items-center gap-0.5">
+                {RIGHT_LINKS.map((link) => (
+                  <NavItem key={link.to} link={link} />
+                ))}
+              </nav>
+
+              <span aria-hidden className="mx-0.5 hidden h-6 w-px shrink-0 bg-ink-100 lg:block" />
+
+              <div className="flex items-center gap-1.5">
+                <IconBtn href={CONTACT.phoneHref} label="Call us" icon={Phone} />
+                <IconBtn
+                  href={buildWhatsAppLink()}
+                  label="WhatsApp"
+                  icon={MessageCircle}
+                  external
+                />
+                <Button
+                  to="/inventory"
+                  variant="dark"
+                  size="sm"
+                  iconRight={ArrowRight}
+                  className="hidden lg:inline-flex"
+                >
+                  Browse
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile */}
+          <div className={cn('relative overflow-visible md:hidden', ROW)}>
             <button
               onClick={() => setOpen(true)}
               aria-label="Open menu"
-              className={cn(
-                'grid h-11 w-11 place-items-center rounded-full transition-colors duration-300 lg:hidden focus-ring',
-                overHero ? 'text-white hover:bg-white/10' : 'text-ink hover:bg-ink-50'
-              )}
+              className="absolute inset-y-0 left-0 z-10 my-auto grid h-10 w-10 place-items-center rounded-xl text-ink transition-colors duration-300 hover:bg-ink-50 focus-ring"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
+
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible">
+              <div className="pointer-events-auto translate-y-1.5 sm:translate-y-2">
+                <Logo size="nav" />
+              </div>
+            </div>
+
+            <a
+              href={CONTACT.phoneHref}
+              aria-label="Call us"
+              className="absolute inset-y-0 right-0 z-10 my-auto grid h-10 w-10 place-items-center rounded-xl text-ink transition-colors duration-300 hover:bg-ink-50 focus-ring"
+            >
+              <Phone className="h-5 w-5" />
+            </a>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       <MobileMenu open={open} onClose={() => setOpen(false)} />
     </>
+  );
+}
+
+function NavItem({ link }) {
+  return (
+    <NavLink
+      to={link.to}
+      end={link.to === '/'}
+      className={({ isActive }) =>
+        cn(
+          'inline-flex h-10 items-center rounded-xl px-4 text-sm font-medium text-ink-500 transition-colors duration-300 hover:bg-ink-50 hover:text-ink',
+          isActive && 'bg-ink-50 font-semibold text-ink'
+        )
+      }
+    >
+      {link.label}
+    </NavLink>
+  );
+}
+
+function IconBtn({ href, label, icon: Icon, external }) {
+  return (
+    <a
+      href={href}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noreferrer' : undefined}
+      aria-label={label}
+      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-ink-500 transition-colors duration-300 hover:bg-ink-50 hover:text-brand focus-ring"
+    >
+      <Icon className="h-[18px] w-[18px]" />
+    </a>
   );
 }
 
@@ -124,26 +132,33 @@ function MobileMenu({ open, onClose }) {
   return (
     <Drawer open={open} onClose={onClose} title="Menu" width="max-w-[88vw] sm:max-w-sm">
       <div className="flex h-full flex-col">
+        <div className="flex justify-center border-b border-ink-100 bg-white py-8">
+          <Logo size="footer" />
+        </div>
+
         <nav className="flex flex-col gap-1 p-4">
           {NAV_LINKS.map((link, i) => (
             <AnimatePresence key={link.to}>
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 24 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.08 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ delay: 0.06 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
               >
                 <NavLink
                   to={link.to}
+                  end={link.to === '/'}
                   onClick={onClose}
                   className={({ isActive }) =>
                     cn(
-                      'flex items-center justify-between rounded-2xl px-5 py-4 text-lg font-semibold transition-colors',
-                      isActive ? 'bg-ink-50 text-ink' : 'text-ink-600 hover:bg-ink-50'
+                      'flex items-center justify-between rounded-2xl px-5 py-4 text-lg font-semibold transition-all duration-300',
+                      isActive
+                        ? 'bg-ink text-white shadow-lg shadow-ink/20'
+                        : 'text-ink-600 hover:bg-ink-50'
                     )
                   }
                 >
                   {link.label}
-                  <ArrowRight className="h-5 w-5 text-ink-300" />
+                  <ArrowRight className="h-5 w-5 opacity-40" />
                 </NavLink>
               </motion.div>
             </AnimatePresence>

@@ -15,7 +15,7 @@ export default function Footer() {
       <div className="mx-auto max-w-8xl container-px py-16 sm:py-20">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <Logo />
+            <Logo size="footer" />
             <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink-500">
               {BRAND.description} Inspected, transparent, and ready to drive — since {BRAND.established}.
             </p>
