@@ -1,5 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { login as loginApi, logout as logoutApi, getStoredToken } from '../services/authService';
+import { getProfile } from '../services/accountService';
+import { tokenStore } from '../services/api';
+import { userFromToken } from '../lib/jwt';
 
 const AuthContext = createContext(null);
 
@@ -7,20 +10,63 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => getStoredToken());
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [bootstrapping, setBootstrapping] = useState(Boolean(getStoredToken()));
+
+  const updateSession = useCallback(({ token: nextToken, user: nextUser }) => {
+    if (nextToken) {
+      tokenStore.set(nextToken);
+      setToken(nextToken);
+    }
+    if (nextUser) {
+      setUser({ name: 'Car Japan Admin', ...nextUser });
+    }
+  }, []);
 
   useEffect(() => {
-    // Rehydrate a lightweight user identity from a stored token.
-    if (token && !user) {
-      setUser({ name: 'Car Japan Admin', email: 'admin@carjapan.pk' });
+    if (!token) {
+      setUser(null);
+      setBootstrapping(false);
+      return;
     }
-  }, [token, user]);
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const profile = await getProfile();
+        if (!cancelled) {
+          setUser({ id: profile.id, email: profile.email, name: 'Car Japan Admin' });
+        }
+      } catch (err) {
+        if (cancelled) return;
+
+        // Only clear the session when the token is actually invalid.
+        if (err.status === 401) {
+          logoutApi();
+          setToken(null);
+          setUser(null);
+          return;
+        }
+
+        // Backend may not have /me deployed yet — keep the session and fall back
+        // to identity embedded in the JWT from login.
+        setUser((prev) => prev || userFromToken(token));
+      } finally {
+        if (!cancelled) setBootstrapping(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const login = async (credentials) => {
     setLoading(true);
     try {
       const data = await loginApi(credentials);
       setToken(data.token);
-      setUser(data.user);
+      setUser({ name: 'Car Japan Admin', ...data.user });
       return data;
     } finally {
       setLoading(false);
@@ -34,8 +80,17 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ token, user, loading, isAuthenticated: Boolean(token), login, logout }),
-    [token, user, loading]
+    () => ({
+      token,
+      user,
+      loading,
+      bootstrapping,
+      isAuthenticated: Boolean(token),
+      login,
+      logout,
+      updateSession,
+    }),
+    [token, user, loading, bootstrapping, updateSession]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

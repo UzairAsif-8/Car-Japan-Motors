@@ -61,13 +61,13 @@ export default function Hero() {
                 deleteSpeed: 32,
                 pauseFor: 2200,
                 cursor: '|',
-                wrapperClassName: 'hero-headline',
-                cursorClassName: 'hero-headline-cursor',
+                wrapperClassName: 'hero-metallic-gradient',
+                cursorClassName: 'hero-metallic-cursor',
               }}
             />
           </h1>
 
-          <p className="mt-4 text-[clamp(1.35rem,3.2vw,2.25rem)] font-semibold tracking-[0.06em] text-[#FFB3BE]">
+          <p className="hero-metallic-gradient mt-4 w-fit text-[clamp(1.35rem,3.2vw,2.25rem)] font-semibold tracking-[0.06em]">
             Since 2015
           </p>
 

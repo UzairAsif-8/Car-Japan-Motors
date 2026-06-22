@@ -7,6 +7,12 @@ import ApiError from '../utils/ApiError.js';
 
 const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(email) {
+  return EMAIL_RE.test(email.trim());
+}
+
 function fail(errors) {
   if (Object.keys(errors).length) {
     throw ApiError.badRequest('Validation failed', errors);
@@ -18,6 +24,32 @@ export function validateLogin(req, _res, next) {
   const errors = {};
   if (!isNonEmptyString(email)) errors.email = 'Email is required';
   if (!isNonEmptyString(password)) errors.password = 'Password is required';
+  fail(errors);
+  next();
+}
+
+export function validateChangeEmail(req, _res, next) {
+  const { newEmail, currentPassword } = req.body;
+  const errors = {};
+  if (!isNonEmptyString(currentPassword)) errors.currentPassword = 'Current password is required';
+  if (!isNonEmptyString(newEmail)) {
+    errors.newEmail = 'New email is required';
+  } else if (!isValidEmail(newEmail)) {
+    errors.newEmail = 'Enter a valid email address';
+  }
+  fail(errors);
+  next();
+}
+
+export function validateChangePassword(req, _res, next) {
+  const { currentPassword, newPassword } = req.body;
+  const errors = {};
+  if (!isNonEmptyString(currentPassword)) errors.currentPassword = 'Current password is required';
+  if (!isNonEmptyString(newPassword)) {
+    errors.newPassword = 'New password is required';
+  } else if (newPassword.length < 8) {
+    errors.newPassword = 'Password must be at least 8 characters';
+  }
   fail(errors);
   next();
 }

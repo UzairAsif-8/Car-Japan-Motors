@@ -1,11 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Car, PlusCircle, MessageSquare, Star, Circle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Car, PlusCircle, MessageSquare, Star, Settings, Circle, LogOut } from 'lucide-react';
 import { ADMIN_NAV_LINKS } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../ui/Logo';
 import { cn } from '../../lib/format';
 
-const ICONS = { LayoutDashboard, Car, PlusCircle, MessageSquare, Star };
+const ICONS = { LayoutDashboard, Car, PlusCircle, MessageSquare, Star, Settings };
 
 export default function AdminSidebar({ onNavigate }) {
   const { logout, user } = useAuth();

@@ -89,24 +89,59 @@
     -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
 
-  /* Rose-blush metallic headline — warm, luxe, on-brand with Car Japan red. */
+  /* Crisp white headline — maximum contrast on dark hero photography. */
   .hero-headline {
-    background-image: linear-gradient(
-      125deg,
-      #ffe4e8 0%,
-      #ffb3be 20%,
-      #f06278 42%,
-      #e8455c 58%,
-      #ff9aab 78%,
-      #ffd6dc 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #ffffff;
   }
 
   .hero-headline-cursor {
-    color: #ff9aab;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  /* Hero headline + “Since 2015” — smooth white / silver shimmer. */
+  .hero-metallic-gradient {
+    background: linear-gradient(
+      100deg,
+      #eef0f4 0%,
+      #f6f7fa 12%,
+      #ffffff 24%,
+      #fafbfc 36%,
+      #ffffff 48%,
+      #f8f9fb 60%,
+      #ffffff 72%,
+      #f4f5f8 84%,
+      #eef0f4 100%
+    );
+    background-size: 200% auto;
+    background-position: 0% center;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: hero-metallic-shine 5s linear infinite;
+    will-change: background-position;
+  }
+
+  .hero-metallic-cursor {
+    color: rgba(255, 255, 255, 0.75);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.75);
+    background: none;
+  }
+
+  @keyframes hero-metallic-shine {
+    0% {
+      background-position: 0% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-metallic-gradient {
+      animation: none;
+      background-position: 40% 50%;
+    }
   }
 
   /* Gentle, premium hover lift used across cards. Token-driven so it stays
