@@ -30,9 +30,16 @@ export function errorHandler(err, _req, res, _next) {
         statusCode = 404;
         message = 'Record not found';
         break;
+      case 'P2022':
+        statusCode = 503;
+        message = 'Database schema is out of date. Run prisma migrate deploy on the server.';
+        break;
       default:
         statusCode = 400;
         message = 'Database request error';
+        if (process.env.NODE_ENV !== 'production') {
+          details = { code: err.code, meta: err.meta };
+        }
     }
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     statusCode = 400;

@@ -5,15 +5,27 @@
 import 'dotenv/config';
 import app from './app.js';
 import prisma from './config/db.js';
+import { ensureSchema } from './config/ensureSchema.js';
 
 const PORT = process.env.PORT || 5000;
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(
-    `🚀 Car Japan API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`
-  );
-});
+let server;
+
+async function start() {
+  try {
+    await ensureSchema();
+  } catch (err) {
+    console.error('Schema bootstrap warning:', err.message);
+  }
+
+  server = app.listen(PORT, () => {
+    console.log(
+      `🚀 Car Japan API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`
+    );
+  });
+}
+
+await start();
 
 // Graceful shutdown (Render safe)
 async function shutdown(signal) {

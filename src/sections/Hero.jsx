@@ -5,8 +5,8 @@ import { ShieldCheck, Star, BadgeCheck, FileCheck2 } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import Image from '../components/ui/Image';
 
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=80';
+// Jet-black luxury SUV — dark studio (Unsplash / Genesis GV70)
+const HERO_IMAGE = '/hero-bg.jpg';
 
 const trust = [
   { icon: ShieldCheck, label: '150-Point Inspection' },
@@ -31,7 +31,14 @@ export default function Hero() {
   return (
     <section ref={ref} className="relative flex min-h-[100svh] items-end overflow-hidden">
       <motion.div style={{ y: imageY, scale: imageScale }} className="absolute inset-0">
-        <Image src={HERO_IMAGE} alt="Premium vehicle at Car Japan showroom" className="h-full w-full" />
+        <Image
+          src={HERO_IMAGE}
+          alt="Jet black luxury SUV at Car Japan Motors"
+          className="h-full w-full bg-black"
+          imgClassName="object-cover object-[center_52%] sm:object-center"
+          loading="eager"
+          fetchPriority="high"
+        />
       </motion.div>
       <motion.div
         style={{ opacity: overlayOpacity }}

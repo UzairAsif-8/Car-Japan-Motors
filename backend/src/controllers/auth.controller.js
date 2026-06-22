@@ -59,30 +59,37 @@ export const getMe = asyncHandler(async (req, res) => {
 
 // PUT /api/auth/change-email
 export const changeEmail = asyncHandler(async (req, res) => {
-  const { newEmail, currentPassword } = req.body;
-  const normalizedEmail = normalizeEmail(newEmail);
+  const { currentEmail, newEmail, currentPassword } = req.body;
+  const normalizedCurrent = normalizeEmail(currentEmail);
+  const normalizedNew = normalizeEmail(newEmail);
 
   const admin = await loadAdminWithPassword(req.admin.id);
   if (!admin) throw ApiError.unauthorized('Account no longer exists');
 
   await verifyCurrentPassword(admin, currentPassword);
 
-  if (normalizedEmail === admin.email) {
-    throw ApiError.badRequest('Validation failed', {
+  if (normalizedCurrent !== admin.email) {
+    throw ApiError.badRequest('Current email does not match your account', {
+      currentEmail: 'Current email does not match your account',
+    });
+  }
+
+  if (normalizedNew === admin.email) {
+    throw ApiError.badRequest('New email must be different from your current email', {
       newEmail: 'New email must be different from your current email',
     });
   }
 
-  const existing = await prisma.admin.findUnique({ where: { email: normalizedEmail } });
+  const existing = await prisma.admin.findUnique({ where: { email: normalizedNew } });
   if (existing) {
-    throw ApiError.badRequest('Validation failed', {
+    throw ApiError.badRequest('This email is already in use', {
       newEmail: 'This email is already in use',
     });
   }
 
   const updated = await prisma.admin.update({
     where: { id: admin.id },
-    data: { email: normalizedEmail },
+    data: { email: normalizedNew },
     select: { id: true, email: true },
   });
 

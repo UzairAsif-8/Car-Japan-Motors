@@ -19,7 +19,7 @@ export default function AdminLogin() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({ defaultValues: { email: 'admin@carjapan.pk', password: 'carjapan' } });
+  } = useForm({ defaultValues: { email: '', password: '' } });
 
   if (isAuthenticated) {
     return <Navigate to={location.state?.from?.pathname || '/admin'} replace />;
@@ -75,7 +75,8 @@ export default function AdminLogin() {
               label="Email address"
               icon={Mail}
               type="email"
-              placeholder="admin@carjapan.pk"
+              autoComplete="email"
+              placeholder="Enter your email"
               error={errors.email?.message}
               {...register('email', { required: 'Email is required' })}
             />
@@ -84,7 +85,8 @@ export default function AdminLogin() {
                 label="Password"
                 icon={Lock}
                 type={showPw ? 'text' : 'password'}
-                placeholder="••••••••"
+                autoComplete="current-password"
+                placeholder="Enter your password"
                 error={errors.password?.message}
                 {...register('password', { required: 'Password is required' })}
               />
@@ -114,10 +116,6 @@ export default function AdminLogin() {
               )}
             </Button>
           </form>
-
-          <div className="mt-6 rounded-2xl border border-ink-100 bg-mist-100 px-4 py-3 text-sm text-ink-500">
-            <span className="font-semibold text-ink-700">Demo credentials:</span> admin@carjapan.pk / carjapan
-          </div>
 
           <Link
             to="/"

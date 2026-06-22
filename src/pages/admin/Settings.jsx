@@ -84,7 +84,7 @@ export default function Settings() {
   const [toast, setToast] = useState(null);
 
   const emailForm = useForm({
-    defaultValues: { currentPassword: '', newEmail: '' },
+    defaultValues: { currentPassword: '', currentEmail: '', newEmail: '' },
   });
 
   const passwordForm = useForm({
@@ -112,6 +112,7 @@ export default function Settings() {
     setEmailSaved(false);
     try {
       const result = await changeEmail({
+        currentEmail: values.currentEmail,
         newEmail: values.newEmail,
         currentPassword: values.currentPassword,
       });
@@ -191,7 +192,14 @@ export default function Settings() {
                 type="button"
                 variant="outline"
                 icon={Pencil}
-                onClick={() => setEditingEmail(true)}
+                onClick={() => {
+                  resetEmail({
+                    currentPassword: '',
+                    currentEmail: user?.email || '',
+                    newEmail: '',
+                  });
+                  setEditingEmail(true);
+                }}
               >
                 Edit Email
               </Button>
@@ -201,6 +209,7 @@ export default function Settings() {
               <div className="relative">
                 <Input
                   label="Current password"
+                  icon={Lock}
                   type={showCurrentPwEmail ? 'text' : 'password'}
                   autoComplete="current-password"
                   error={emailErrors.currentPassword?.message}
@@ -216,10 +225,26 @@ export default function Settings() {
                 </button>
               </div>
               <Input
-                label="New email"
+                label="Current email"
+                icon={Mail}
                 type="email"
                 autoComplete="email"
-                placeholder="owner@gmail.com"
+                placeholder="Enter current email"
+                error={emailErrors.currentEmail?.message}
+                {...registerEmail('currentEmail', {
+                  required: 'Current email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Enter a valid email address',
+                  },
+                })}
+              />
+              <Input
+                label="New email"
+                icon={Mail}
+                type="email"
+                autoComplete="off"
+                placeholder="Enter new email"
                 error={emailErrors.newEmail?.message}
                 {...registerEmail('newEmail', {
                   required: 'New email is required',
@@ -227,6 +252,9 @@ export default function Settings() {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                     message: 'Enter a valid email address',
                   },
+                  validate: (value, formValues) =>
+                    value.toLowerCase().trim() !== formValues.currentEmail?.toLowerCase().trim() ||
+                    'New email must be different from your current email',
                 })}
               />
               <div className="flex flex-wrap gap-3 pt-1">

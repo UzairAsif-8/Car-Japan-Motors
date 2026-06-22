@@ -36,10 +36,14 @@ export async function getProfile() {
   return { ...MOCK_PROFILE };
 }
 
-export async function changeEmail({ newEmail, currentPassword }) {
+export async function changeEmail({ currentEmail, newEmail, currentPassword }) {
   if (API_ENABLED) {
     try {
-      const { data } = await api.put('/api/auth/change-email', { newEmail, currentPassword });
+      const { data } = await api.put('/api/auth/change-email', {
+        currentEmail,
+        newEmail,
+        currentPassword,
+      });
       if (data.token) tokenStore.set(data.token);
       return data;
     } catch (err) {
@@ -50,13 +54,21 @@ export async function changeEmail({ newEmail, currentPassword }) {
   if (currentPassword !== MOCK_PASSWORD) {
     throw new Error('Current password is incorrect');
   }
-  if (!newEmail?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-    throw new Error('Enter a valid email address');
+  const normalizedCurrent = currentEmail?.toLowerCase().trim();
+  const normalizedNew = newEmail?.toLowerCase().trim();
+  if (!normalizedCurrent || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedCurrent)) {
+    throw new Error('Enter a valid current email address');
   }
-  if (newEmail.toLowerCase().trim() === MOCK_PROFILE.email) {
+  if (normalizedCurrent !== MOCK_PROFILE.email) {
+    throw new Error('Current email does not match your account');
+  }
+  if (!normalizedNew || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedNew)) {
+    throw new Error('Enter a valid new email address');
+  }
+  if (normalizedNew === MOCK_PROFILE.email) {
     throw new Error('New email must be different from your current email');
   }
-  MOCK_PROFILE.email = newEmail.toLowerCase().trim();
+  MOCK_PROFILE.email = normalizedNew;
   return {
     success: true,
     message: 'Email updated successfully',

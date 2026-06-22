@@ -29,9 +29,14 @@ export function validateLogin(req, _res, next) {
 }
 
 export function validateChangeEmail(req, _res, next) {
-  const { newEmail, currentPassword } = req.body;
+  const { currentEmail, newEmail, currentPassword } = req.body;
   const errors = {};
   if (!isNonEmptyString(currentPassword)) errors.currentPassword = 'Current password is required';
+  if (!isNonEmptyString(currentEmail)) {
+    errors.currentEmail = 'Current email is required';
+  } else if (!isValidEmail(currentEmail)) {
+    errors.currentEmail = 'Enter a valid email address';
+  }
   if (!isNonEmptyString(newEmail)) {
     errors.newEmail = 'New email is required';
   } else if (!isValidEmail(newEmail)) {

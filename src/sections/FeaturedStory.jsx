@@ -2,27 +2,38 @@ import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import Image from '../components/ui/Image';
 import Reveal from '../components/ui/Reveal';
 
-const STORY_IMAGE =
-  'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=2000&q=80';
+// Black Toyota Land Cruiser — Unsplash (Abraham Okolo)
+const STORY_IMAGE = '/flagship-land-cruiser.jpg';
 
-/** Apple-style full-bleed storytelling moment with layered parallax. */
+/** Flagship Land Cruiser — full-bleed dark background with copy overlay. */
 export default function FeaturedStory() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
-  const scale = useTransform(scrollYProgress, [0, 1], [1.1, 1.2]);
+  const y = useTransform(scrollYProgress, [0, 1], ['-4%', '4%']);
 
   return (
-    <section ref={ref} className="relative flex min-h-[88svh] items-center overflow-hidden bg-ink-900">
-      <motion.div style={{ y, scale }} className="absolute inset-0">
-        <Image src={STORY_IMAGE} alt="The Land Cruiser story" className="h-full w-full" imgClassName="opacity-80" />
+    <section
+      ref={ref}
+      className="relative flex min-h-[min(72svh,720px)] items-center overflow-hidden bg-ink-900 sm:min-h-[min(78svh,780px)]"
+    >
+      <motion.div style={{ y }} className="absolute inset-0 h-full w-full" aria-hidden>
+        <img
+          src={STORY_IMAGE}
+          alt=""
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="h-full w-full object-cover object-[78%_center] max-md:object-[62%_center]"
+        />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-r from-ink-900/90 via-ink-900/55 to-ink-900/20" />
 
-      <div className="relative mx-auto w-full max-w-8xl container-px py-24">
+      {/* Text-side shade — keeps the right side open so the car stays visible */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-900/95 via-ink-900/45 to-ink-900/5" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/55 via-transparent to-ink-900/20 md:from-ink-900/35" />
+
+      <div className="relative mx-auto w-full max-w-8xl container-px py-16 sm:py-20">
         <div className="max-w-xl">
           <Reveal>
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-300">
@@ -30,7 +41,7 @@ export default function FeaturedStory() {
             </span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="mt-5 font-display text-5xl font-extrabold leading-[1.02] tracking-tight text-white sm:text-6xl">
+            <h2 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
               Built to go
               <br />
               anywhere. Made
@@ -39,21 +50,21 @@ export default function FeaturedStory() {
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-6 max-w-md text-lg leading-relaxed text-white/75">
+            <p className="mt-6 max-w-md text-base leading-relaxed text-white/80 sm:text-lg">
               The Toyota Land Cruiser is more than a vehicle — it’s a legacy of reliability.
               Every example we sell carries that same uncompromising standard, inspected to the
               smallest detail.
             </p>
           </Reveal>
           <Reveal delay={0.15}>
-            <div className="mt-9 flex flex-wrap gap-8">
+            <div className="mt-8 flex flex-wrap gap-6 sm:gap-8">
               {[
                 { k: '3.5L', v: 'Twin-Turbo V6' },
                 { k: '4WD', v: 'Go-anywhere' },
                 { k: '7', v: 'Seats' },
               ].map((s) => (
                 <div key={s.v}>
-                  <p className="font-display text-3xl font-extrabold text-white">{s.k}</p>
+                  <p className="font-display text-2xl font-extrabold text-white sm:text-3xl">{s.k}</p>
                   <p className="text-sm text-white/60">{s.v}</p>
                 </div>
               ))}
