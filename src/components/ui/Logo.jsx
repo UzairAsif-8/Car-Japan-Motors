@@ -6,7 +6,7 @@ import { cn } from '../../lib/format';
  * Brand logo — loads `/logo.png` (full wordmark with icon).
  *
  *  - `chip`  : premium white backing for dark panels (admin sidebar, login)
- *  - `size`  : sm | md | lg | admin | footer | nav | navCompact
+ *  - `size`  : sm | md | lg | admin | footer | header | nav | navCompact
  */
 const SIZES = {
   sm: 'h-9 w-auto',
@@ -14,6 +14,7 @@ const SIZES = {
   lg: 'h-14 w-auto sm:h-16',
   admin: 'h-20 w-auto sm:h-28',
   footer: 'h-28 w-auto sm:h-32 md:h-36 lg:h-44',
+  header: 'h-32 w-auto sm:h-36',
   nav: 'h-32 w-auto sm:h-40 md:h-48 lg:h-56',
   navCompact: 'h-20 w-auto sm:h-24 lg:h-32',
 };

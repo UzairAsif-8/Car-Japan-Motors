@@ -46,21 +46,21 @@ export default function SearchBar({ className }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        'rounded-[28px] border border-white/60 bg-white/95 p-3 shadow-elevated backdrop-blur-xl',
+        'rounded-2xl border border-white/60 bg-white/95 p-1.5 shadow-elevated backdrop-blur-xl sm:rounded-[28px] sm:p-3',
         className
       )}
     >
-      <div className="flex items-center gap-2 rounded-2xl px-4 py-2">
-        <Search className="h-5 w-5 shrink-0 text-ink-400" />
+      <div className="flex items-center gap-1 rounded-xl px-2 py-0.5 sm:gap-2 sm:rounded-2xl sm:px-4 sm:py-2">
+        <Search className="h-3.5 w-3.5 shrink-0 text-ink-400 sm:h-5 sm:w-5" />
         <input
           value={form.search}
           onChange={update('search')}
           placeholder="Search by make, model or keyword…"
-          className="h-11 w-full bg-transparent text-[15px] text-ink placeholder:text-ink-400 outline-none"
+          className="h-8 w-full bg-transparent text-xs text-ink placeholder:text-ink-400 outline-none sm:h-11 sm:text-[15px]"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-t border-ink-100 pt-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
+      <div className="grid grid-cols-3 gap-1 border-t border-ink-100 pt-1 sm:gap-2 sm:pt-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
         <PillSelect value={form.make} onChange={update('make')} placeholder="Any Make" options={MAKES} />
         <PillSelect
           value={form.year}
@@ -69,19 +69,25 @@ export default function SearchBar({ className }) {
           options={YEARS.map((y) => ({ value: y, label: y }))}
         />
         <PillSelect
+          value={form.price}
+          onChange={update('price')}
+          placeholder="Any Price"
+          options={priceOptions}
+          className="lg:hidden"
+        />
+        <PillSelect
           value={form.transmission}
           onChange={update('transmission')}
           placeholder="Any Transmission"
           options={TRANSMISSIONS}
           className="hidden lg:block"
         />
-        <PillSelect
-          value={form.price}
-          onChange={update('price')}
-          options={priceOptions}
-          className="lg:hidden"
-        />
-        <Button type="submit" size="lg" icon={Search} className="col-span-2 lg:col-span-1">
+        <Button
+          type="submit"
+          size="lg"
+          icon={Search}
+          className="col-span-3 mt-0.5 h-7 text-[11px] lg:col-span-1 lg:mt-0 lg:h-14 lg:text-base"
+        >
           Search
         </Button>
       </div>
@@ -96,7 +102,7 @@ function PillSelect({ value, onChange, placeholder, options = [], className }) {
       <select
         value={value}
         onChange={onChange}
-        className="h-12 w-full appearance-none rounded-2xl bg-mist-200 pl-4 pr-9 text-sm font-semibold text-ink-700 outline-none transition-colors hover:bg-mist-300 focus:ring-2 focus:ring-ink-900/10"
+        className="h-8 w-full min-w-0 appearance-none truncate rounded-lg bg-mist-200 pl-1.5 pr-6 text-[10px] font-semibold text-ink-700 outline-none transition-colors hover:bg-mist-300 focus:ring-2 focus:ring-ink-900/10 sm:h-12 sm:rounded-2xl sm:pl-4 sm:pr-9 sm:text-sm"
       >
         {placeholder && <option value="">{placeholder}</option>}
         {normalized.map((o) => (
@@ -105,7 +111,7 @@ function PillSelect({ value, onChange, placeholder, options = [], className }) {
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-ink-400 sm:right-3 sm:h-4 sm:w-4" />
     </div>
   );
 }

@@ -11,8 +11,10 @@ import { cn } from '../lib/format';
 const LEFT_LINKS = NAV_LINKS.slice(0, 2);
 const RIGHT_LINKS = NAV_LINKS.slice(2);
 
-/** Compact nav row — logo overflows but stays vertically centered. */
-const ROW = 'h-16 lg:h-20';
+/** Desktop row — logo overflows but stays vertically centered. */
+const ROW_DESKTOP = 'h-16 lg:h-20';
+/** Mobile row — compact bar; logo overflows vertically. */
+const ROW_MOBILE = 'h-14 sm:h-16';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -22,7 +24,7 @@ export default function Navbar() {
       <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
         <div className="relative mx-auto max-w-7xl overflow-visible rounded-2xl border border-ink-100/80 bg-white px-4 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] sm:rounded-3xl sm:px-6">
           {/* Desktop */}
-          <div className={cn('relative hidden overflow-visible md:block', ROW)}>
+          <div className={cn('relative hidden overflow-visible md:block', ROW_DESKTOP)}>
             <nav className="absolute inset-y-0 left-0 z-10 flex items-center gap-0.5">
               {LEFT_LINKS.map((link) => (
                 <NavItem key={link.to} link={link} />
@@ -65,35 +67,43 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile */}
-          <div className={cn('relative overflow-visible md:hidden', ROW)}>
+          {/* Mobile — menu | logo | red call */}
+          <div className={cn('relative overflow-visible md:hidden', ROW_MOBILE)}>
             <button
               onClick={() => setOpen(true)}
               aria-label="Open menu"
-              className="absolute inset-y-0 left-0 z-10 my-auto grid h-10 w-10 place-items-center rounded-xl text-ink transition-colors duration-300 hover:bg-ink-50 focus-ring"
+              className="absolute inset-y-0 left-0 z-10 my-auto grid h-9 w-9 place-items-center rounded-xl text-ink transition-colors duration-300 hover:bg-ink-50 focus-ring"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-[18px] w-[18px]" strokeWidth={2} />
             </button>
 
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible">
               <div className="pointer-events-auto translate-y-1.5 sm:translate-y-2">
-                <Logo size="nav" />
+                <Logo size="header" />
               </div>
             </div>
 
-            <a
-              href={CONTACT.phoneHref}
-              aria-label="Call us"
-              className="absolute inset-y-0 right-0 z-10 my-auto grid h-10 w-10 place-items-center rounded-xl text-ink transition-colors duration-300 hover:bg-ink-50 focus-ring"
-            >
-              <Phone className="h-5 w-5" />
-            </a>
+            <div className="absolute inset-y-0 right-0 z-10 flex items-center">
+              <PhoneBtn />
+            </div>
           </div>
         </div>
       </header>
 
       <MobileMenu open={open} onClose={() => setOpen(false)} />
     </>
+  );
+}
+
+function PhoneBtn() {
+  return (
+    <a
+      href={CONTACT.phoneHref}
+      aria-label="Call us"
+      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand text-white shadow-[0_6px_18px_-6px_rgba(216,30,44,0.55)] transition-transform duration-300 hover:scale-[1.04] focus-ring"
+    >
+      <Phone className="h-[18px] w-[18px]" strokeWidth={2.2} />
+    </a>
   );
 }
 
