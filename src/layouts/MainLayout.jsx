@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import FloatingWhatsApp from '../components/FloatingWhatsApp';
+import FloatingSocial from '../components/FloatingSocial';
 
 export default function MainLayout() {
   return (
@@ -11,7 +11,7 @@ export default function MainLayout() {
         <Outlet />
       </div>
       <Footer />
-      <FloatingWhatsApp />
+      <FloatingSocial />
     </div>
   );
 }

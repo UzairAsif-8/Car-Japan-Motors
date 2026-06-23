@@ -38,9 +38,10 @@ export const HOURS = [
 ];
 
 export const SOCIAL = {
-  facebook: 'https://facebook.com',
-  instagram: 'https://instagram.com',
-  youtube: 'https://youtube.com',
+  facebook: 'https://www.facebook.com/share/1BHF4FxuHu/?mibextid=wwXIfr',
+  instagram: 'https://www.instagram.com/carjapanmotors?igsh=MTIxZ3E3ODZwZmJxdA==',
+  tiktok: 'https://www.tiktok.com/@carjapanmotors?_r=1&_t=ZS-97S1Xb6yvpt',
+  youtube: 'https://youtube.com/@carjapanmotors?si=O7NNpeC5yaWVdJSY',
 };
 
 /** Build a deep-linked WhatsApp message for a specific vehicle. */

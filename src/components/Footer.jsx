@@ -1,12 +1,40 @@
 import { Link } from 'react-router-dom';
-import { Phone, MessageCircle, Mail, MapPin, Facebook, Instagram, Youtube, ArrowUpRight } from 'lucide-react';
+import { Phone, MessageCircle, Mail, MapPin, ArrowUpRight } from 'lucide-react';
 import { BRAND, CONTACT, NAV_LINKS, SOCIAL, HOURS, MAKES, buildWhatsAppLink } from '../constants';
 import Logo from './ui/Logo';
+import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from './icons/BrandSocialIcons';
+import { cn } from '../lib/format';
 
-const socialIcons = [
-  { icon: Facebook, href: SOCIAL.facebook, label: 'Facebook' },
-  { icon: Instagram, href: SOCIAL.instagram, label: 'Instagram' },
-  { icon: Youtube, href: SOCIAL.youtube, label: 'YouTube' },
+const socialLinks = [
+  {
+    key: 'facebook',
+    href: SOCIAL.facebook,
+    label: 'Follow us on Facebook',
+    className: 'bg-[#1877F2] text-white shadow-[0_6px_18px_-6px_rgba(24,119,242,0.55)]',
+    Icon: FacebookIcon,
+  },
+  {
+    key: 'instagram',
+    href: SOCIAL.instagram,
+    label: 'Follow us on Instagram',
+    className:
+      'bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white shadow-[0_6px_18px_-6px_rgba(238,42,123,0.45)]',
+    Icon: InstagramIcon,
+  },
+  {
+    key: 'tiktok',
+    href: SOCIAL.tiktok,
+    label: 'Follow us on TikTok',
+    className: 'bg-black text-white shadow-[0_6px_18px_-6px_rgba(0,0,0,0.35)]',
+    Icon: TikTokIcon,
+  },
+  {
+    key: 'youtube',
+    href: SOCIAL.youtube,
+    label: 'Subscribe on YouTube',
+    className: 'bg-[#FF0000] text-white shadow-[0_6px_18px_-6px_rgba(255,0,0,0.45)]',
+    Icon: YouTubeIcon,
+  },
 ];
 
 export default function Footer() {
@@ -19,17 +47,20 @@ export default function Footer() {
             <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink-500">
               {BRAND.description} Inspected, transparent, and ready to drive — since {BRAND.established}.
             </p>
-            <div className="mt-6 flex gap-2.5">
-              {socialIcons.map(({ icon: Icon, href, label }) => (
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              {socialLinks.map(({ key, href, label, className, Icon }) => (
                 <a
-                  key={label}
+                  key={key}
                   href={href}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={label}
-                  className="grid h-11 w-11 place-items-center rounded-full border border-ink-100 bg-white text-ink-500 transition-all duration-300 hover:-translate-y-0.5 hover:border-ink-900 hover:text-ink"
+                  className={cn(
+                    'grid h-11 w-11 place-items-center rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:scale-105',
+                    className
+                  )}
                 >
-                  <Icon className="h-[18px] w-[18px]" />
+                  <Icon className="h-5 w-5" />
                 </a>
               ))}
             </div>
