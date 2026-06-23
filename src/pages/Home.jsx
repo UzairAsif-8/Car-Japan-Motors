@@ -1,26 +1,21 @@
 import PageTransition from '../components/PageTransition';
 import Hero from '../sections/Hero';
 import BrowseByType from '../sections/BrowseByType';
+import FeaturedInventory from '../sections/FeaturedInventory';
 import StatusInventory from '../sections/StatusInventory';
 import WhyCarJapan from '../sections/WhyCarJapan';
 import FeaturedStory from '../sections/FeaturedStory';
 import Showroom from '../sections/Showroom';
 import Testimonials from '../sections/Testimonials';
 import CTASection from '../components/CTASection';
-import { getFeaturedCars, getSoldCars, getUpcomingCars } from '../services/carService';
+import { getSoldCars, getUpcomingCars } from '../services/carService';
 import { CAR_STATUS } from '../constants';
 
 export default function Home() {
   return (
     <PageTransition>
       <Hero />
-      <StatusInventory
-        eyebrow="Featured inventory"
-        title="Featured available vehicles"
-        description="A curated selection from our showroom floor — each one inspected, documented and ready to drive home."
-        fetcher={() => getFeaturedCars(12)}
-        viewAllTo={`/inventory?status=${CAR_STATUS.AVAILABLE}`}
-      />
+      <FeaturedInventory />
       <StatusInventory
         eyebrow="Recently sold"
         title="Recently sold vehicles"
