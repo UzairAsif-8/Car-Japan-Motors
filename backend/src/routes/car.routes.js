@@ -5,6 +5,7 @@ import {
   createCar,
   updateCar,
   deleteCar,
+  updateCarStatus,
 } from '../controllers/car.controller.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { uploadCarImages } from '../middlewares/upload.middleware.js';
@@ -17,6 +18,7 @@ router.get('/:id', getCarById);
 
 // Admin (JWT protected). `uploadCarImages` parses multipart + image files.
 router.post('/', authMiddleware, uploadCarImages, createCar);
+router.patch('/:id/status', authMiddleware, updateCarStatus);
 router.put('/:id', authMiddleware, uploadCarImages, updateCar);
 router.delete('/:id', authMiddleware, deleteCar);
 

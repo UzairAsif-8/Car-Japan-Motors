@@ -10,7 +10,7 @@ import Button from '../components/ui/Button';
 import useInventoryFilters from '../hooks/useInventoryFilters';
 import useAsync from '../hooks/useAsync';
 import { getCars } from '../services/carService';
-import { SORT_OPTIONS } from '../constants';
+import { SORT_OPTIONS, INVENTORY_STATUS_FILTERS } from '../constants';
 import { cn } from '../lib/format';
 
 const PER_PAGE = 9;
@@ -66,6 +66,25 @@ export default function Inventory() {
           </aside>
 
           <div>
+            {/* Status filters */}
+            <div className="mb-4 flex flex-wrap gap-2">
+              {INVENTORY_STATUS_FILTERS.map((f) => (
+                <button
+                  key={f.value || 'all'}
+                  type="button"
+                  onClick={() => setFilters({ status: f.value })}
+                  className={cn(
+                    'rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300',
+                    (filters.status || '') === f.value
+                      ? 'border-ink bg-ink text-white shadow-soft'
+                      : 'border-ink-100 bg-white text-ink-600 hover:border-ink-300 hover:text-ink'
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
             {/* Toolbar */}
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -81,7 +100,8 @@ export default function Inventory() {
                 <p className="text-sm text-ink-500">
                   {loading ? 'Loading…' : (
                     <>
-                      <span className="font-semibold text-ink">{list.length}</span> vehicles available
+                      <span className="font-semibold text-ink">{list.length}</span>{' '}
+                      {filters.status ? 'vehicles' : 'vehicles'}
                     </>
                   )}
                 </p>

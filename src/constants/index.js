@@ -88,3 +88,26 @@ export const SORT_OPTIONS = [
 
 export const PRICE_BOUNDS = { min: 1500000, max: 90000000, step: 500000 };
 export const YEARS = Array.from({ length: 16 }, (_, i) => 2025 - i);
+
+export const CAR_STATUS = {
+  AVAILABLE: 'AVAILABLE',
+  SOLD: 'SOLD',
+  UPCOMING: 'UPCOMING',
+};
+
+export const CAR_STATUS_OPTIONS = [
+  { value: CAR_STATUS.AVAILABLE, label: 'Available' },
+  { value: CAR_STATUS.SOLD, label: 'Sold' },
+  { value: CAR_STATUS.UPCOMING, label: 'Upcoming' },
+];
+
+export const STATUS_BADGE = {
+  [CAR_STATUS.AVAILABLE]: { label: 'Available', tone: 'success' },
+  [CAR_STATUS.SOLD]: { label: 'Sold', tone: 'danger' },
+  [CAR_STATUS.UPCOMING]: { label: 'Upcoming', tone: 'warning' },
+};
+
+export const INVENTORY_STATUS_FILTERS = [
+  { value: '', label: 'All' },
+  ...CAR_STATUS_OPTIONS,
+];

@@ -1,30 +1,35 @@
 import { Link } from 'react-router-dom';
-import { Car, MessageSquare, TrendingUp, Eye, ArrowRight, PlusCircle } from 'lucide-react';
+import { Car, MessageSquare, TrendingUp, Eye, ArrowRight, PlusCircle, Star } from 'lucide-react';
 import AdminStatCard from '../../components/admin/AdminStatCard';
 import AdminTable from '../../components/admin/AdminTable';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
+import StatusBadge from '../../components/StatusBadge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import useAsync from '../../hooks/useAsync';
-import { getCars } from '../../services/carService';
+import { getAdminCars, getDashboardStats } from '../../services/carService';
 import { getInquiries } from '../../services/inquiryService';
-import { formatPrice, formatDate } from '../../lib/format';
+import { CAR_STATUS } from '../../constants';
+import { formatPrice } from '../../lib/format';
 
 export default function Dashboard() {
-  const { data: cars, loading: carsLoading } = useAsync(() => getCars(), []);
+  const { data: stats, loading: statsLoading } = useAsync(() => getDashboardStats(), []);
+  const { data: cars, loading: carsLoading } = useAsync(() => getAdminCars(), []);
   const { data: inquiries, loading: inqLoading } = useAsync(() => getInquiries(), []);
 
   const carList = cars || [];
   const inqList = inquiries || [];
-  const newInquiries = inqList.filter((i) => i.status === 'new').length;
-  const featuredCount = carList.filter((c) => c.featured).length;
 
-  const stats = [
-    { icon: Car, label: 'Total Vehicles', value: carList.length, accent: 'brand', trend: '+3 this week' },
-    { icon: MessageSquare, label: 'New Inquiries', value: newInquiries, accent: 'amber' },
-    { icon: TrendingUp, label: 'Featured Listings', value: featuredCount, accent: 'emerald' },
-    { icon: Eye, label: 'Total Inquiries', value: inqList.length, accent: 'ink' },
+  const dashboardStats = [
+    { icon: Car, label: 'Total Cars', value: stats?.totalCars ?? '—', accent: 'ink' },
+    { icon: TrendingUp, label: 'Available Cars', value: stats?.available ?? '—', accent: 'emerald' },
+    { icon: Car, label: 'Sold Cars', value: stats?.sold ?? '—', accent: 'brand' },
+    { icon: Eye, label: 'Upcoming Cars', value: stats?.upcoming ?? '—', accent: 'amber' },
+    { icon: MessageSquare, label: 'Total Inquiries', value: stats?.totalInquiries ?? '—', accent: 'ink' },
+    { icon: Star, label: 'Total Reviews', value: stats?.totalReviews ?? '—', accent: 'amber' },
   ];
+
+  const loading = statsLoading || carsLoading || inqLoading;
 
   return (
     <div>
@@ -38,10 +43,10 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {carsLoading || inqLoading
-          ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl" />)
-          : stats.map((s, i) => <AdminStatCard key={s.label} index={i} {...s} />)}
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl" />)
+          : dashboardStats.map((s, i) => <AdminStatCard key={s.label} index={i} {...s} />)}
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-2">
@@ -112,9 +117,19 @@ export default function Dashboard() {
                     </div>
                   ),
                 },
-                { key: 'price', header: 'Price', align: 'right', render: (r) => (
-                  <span className="font-semibold text-ink">{formatPrice(r.price)}</span>
-                ) },
+                {
+                  key: 'status',
+                  header: 'Status',
+                  render: (r) => <StatusBadge status={r.status || CAR_STATUS.AVAILABLE} />,
+                },
+                {
+                  key: 'price',
+                  header: 'Price',
+                  align: 'right',
+                  render: (r) => (
+                    <span className="font-semibold text-ink">{formatPrice(r.price)}</span>
+                  ),
+                },
               ]}
             />
           )}

@@ -6,6 +6,8 @@ const TONES = {
   dark: 'bg-ink text-white border-ink',
   light: 'bg-white/85 text-ink border-white/60 backdrop-blur',
   success: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+  danger: 'bg-red-50 text-red-700 border-red-100',
+  warning: 'bg-amber-50 text-amber-700 border-amber-100',
 };
 
 export default function Badge({ tone = 'neutral', icon: Icon, className, children }) {

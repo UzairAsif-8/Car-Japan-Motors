@@ -52,7 +52,7 @@ model Car {
   images   String[] // Cloudinary secure URLs only
 
   isFeatured Boolean @default(false)
-  isSold     Boolean @default(false)
+  status     CarStatus @default(AVAILABLE)
 
   // Back-relation for inquiries placed against this car.
   inquiries Inquiry[]
@@ -61,8 +61,14 @@ model Car {
   updatedAt DateTime @updatedAt
 
   @@index([isFeatured])
-  @@index([isSold])
+  @@index([status])
   @@index([bodyType])
+}
+
+enum CarStatus {
+  AVAILABLE
+  SOLD
+  UPCOMING
 }
 
 /// A customer review / testimonial. Public submissions start PENDING; admin-entered

@@ -38,6 +38,15 @@ export function parseStringArray(value) {
 /** Coerce truthy form values ('true' / '1' / true) → boolean. */
 export const toBool = (v) => v === true || v === 'true' || v === '1';
 
+export const CAR_STATUSES = ['AVAILABLE', 'SOLD', 'UPCOMING'];
+
+/** Normalize status from enum, legacy isSold, or default. */
+export function normalizeStatus(car) {
+  if (car?.status && CAR_STATUSES.includes(car.status)) return car.status;
+  if (car?.isSold) return 'SOLD';
+  return 'AVAILABLE';
+}
+
 /** Coerce to a rounded integer, or NaN when the value is not numeric. */
 function toInt(value) {
   if (value === '' || value == null) return undefined;
@@ -94,7 +103,9 @@ export function mapCarToApi(car) {
     features: Array.isArray(car.features) ? car.features : [],
     images: Array.isArray(car.images) ? car.images : [],
     isFeatured: Boolean(car.isFeatured),
-    isSold: Boolean(car.isSold),
+    status: normalizeStatus(car),
+    // Deprecated — kept for backward compatibility with older clients.
+    isSold: normalizeStatus(car) === 'SOLD',
     createdAt: car.createdAt ?? null,
     updatedAt: car.updatedAt ?? null,
   };
@@ -130,7 +141,14 @@ export function mapCarFromApi(input = {}) {
   }
 
   if (input.isFeatured !== undefined) data.isFeatured = toBool(input.isFeatured);
-  if (input.isSold !== undefined) data.isSold = toBool(input.isSold);
+
+  // Status: prefer explicit enum; fall back to legacy isSold boolean.
+  if (input.status !== undefined && input.status !== null && input.status !== '') {
+    const status = String(input.status).toUpperCase();
+    if (CAR_STATUSES.includes(status)) data.status = status;
+  } else if (input.isSold !== undefined) {
+    data.status = toBool(input.isSold) ? 'SOLD' : 'AVAILABLE';
+  }
 
   const features = parseStringArray(input.features);
   if (features !== undefined) data.features = features;

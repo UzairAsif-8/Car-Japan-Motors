@@ -1,4 +1,5 @@
 import api, { API_ENABLED, mockDelay } from './api';
+import { CAR_STATUS } from '../constants';
 
 // Mock data is loaded ONLY in local-dev mock mode via a dynamic import, so the
 // bundled dummy vehicles are statically removed from production builds.
@@ -16,6 +17,7 @@ async function loadMockCars() {
  *   GET    /api/cars/:id
  *   POST   /api/cars        (multipart: fields + image files)
  *   PUT    /api/cars/:id
+ *   PATCH  /api/cars/:id/status
  *   DELETE /api/cars/:id
  * The function signatures and return shapes (the frontend car shape) never change —
  * the mappers below are the single seam translating to/from the backend shape.
@@ -23,10 +25,17 @@ async function loadMockCars() {
 
 /* ── mapping seam (backend ↔ frontend shape) ─────────────── */
 
+function normalizeStatus(c) {
+  if (c?.status && Object.values(CAR_STATUS).includes(c.status)) return c.status;
+  if (c?.isSold) return CAR_STATUS.SOLD;
+  return CAR_STATUS.AVAILABLE;
+}
+
 /** Backend Car (id/title/fuelType…) → frontend car (_id/name/fuel…). */
 function mapCarFromApi(c) {
   if (!c) return c;
   const title = c.title || '';
+  const status = normalizeStatus(c);
   return {
     _id: c.id,
     name: title,
@@ -46,18 +55,58 @@ function mapCarFromApi(c) {
     drivetrain: c.drivetrain || '',
     seats: c.seats ?? '',
     featured: Boolean(c.isFeatured),
+    status,
+    isSold: status === CAR_STATUS.SOLD,
     condition: c.condition || '',
     images: Array.isArray(c.images) ? c.images : [],
     highlights: Array.isArray(c.features) ? c.features : [],
     description: c.description || '',
     location: c.location || '',
-    isSold: Boolean(c.isSold),
   };
+}
+
+/** Build query params for GET /api/cars from the frontend filter shape. */
+function buildApiParams(params = {}) {
+  const {
+    status,
+    sold,
+    featured,
+    sort,
+    search,
+    bodyType,
+    fuel,
+    transmission,
+    minPrice,
+    maxPrice,
+    admin,
+  } = params;
+
+  const apiParams = {};
+
+  if (!admin) {
+    if (status) apiParams.status = status;
+    else if (sold === true || sold === 'true') apiParams.status = CAR_STATUS.SOLD;
+    else if (sold === false || sold === 'false') apiParams.status = CAR_STATUS.AVAILABLE;
+  }
+
+  if (featured) apiParams.featured = true;
+  if (sort && sort !== 'featured' && sort !== 'year-desc' && sort !== 'mileage-asc') {
+    apiParams.sort = sort;
+  }
+  if (search) apiParams.search = search;
+  if (bodyType) apiParams.bodyType = bodyType;
+  if (fuel) apiParams.fuelType = fuel;
+  if (transmission) apiParams.transmission = transmission;
+  if (minPrice != null) apiParams.minPrice = minPrice;
+  if (maxPrice != null) apiParams.maxPrice = maxPrice;
+
+  return apiParams;
 }
 
 /** Frontend car payload → multipart FormData for the backend. */
 function buildCarFormData(payload = {}) {
   const fd = new FormData();
+  const status = payload.status || CAR_STATUS.AVAILABLE;
   const fields = {
     title: payload.name || `${payload.make || ''} ${payload.model || ''}`.trim(),
     price: payload.price,
@@ -76,6 +125,7 @@ function buildCarFormData(payload = {}) {
     condition: payload.condition || 'Used',
     description: payload.description || '',
     isFeatured: payload.featured ? 'true' : 'false',
+    status,
   };
   Object.entries(fields).forEach(([k, v]) => {
     if (v !== undefined && v !== null) fd.append(k, v);
@@ -102,8 +152,13 @@ const applyQuery = (cars, params = {}) => {
     minPrice,
     maxPrice,
     featured,
+    status,
     sort,
   } = params;
+
+  if (status) {
+    result = result.filter((c) => (c.status || CAR_STATUS.AVAILABLE) === status);
+  }
 
   if (search) {
     const q = search.toLowerCase();
@@ -146,16 +201,14 @@ const applyQuery = (cars, params = {}) => {
 
 export async function getCars(params = {}) {
   if (API_ENABLED) {
-    const { data } = await api.get('/api/cars', { params: { sold: false } });
+    const { data } = await api.get('/api/cars', { params: buildApiParams(params) });
     const cars = (data?.data || []).map(mapCarFromApi);
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
       console.debug('[getCars] source=API count=', cars.length);
     }
-    // Apply all filtering/sorting client-side for parity with mock mode.
     return applyQuery(cars, params);
   }
-  // Local-dev mock mode only — removed entirely from production builds.
   if (import.meta.env.DEV) {
     const CARS = await loadMockCars();
     await mockDelay();
@@ -166,12 +219,16 @@ export async function getCars(params = {}) {
   return [];
 }
 
+export const getAvailableCars = (params = {}) => getCars({ ...params, status: CAR_STATUS.AVAILABLE });
+export const getSoldCars = (params = {}) => getCars({ ...params, status: CAR_STATUS.SOLD });
+export const getUpcomingCars = (params = {}) => getCars({ ...params, status: CAR_STATUS.UPCOMING });
+export const getAdminCars = () => getCars({ admin: true });
+
 export async function getCarById(id) {
   if (API_ENABLED) {
     const { data } = await api.get(`/api/cars/${id}`);
     return mapCarFromApi(data?.data);
   }
-  // Local-dev mock mode only — removed entirely from production builds.
   if (import.meta.env.DEV) {
     const CARS = await loadMockCars();
     await mockDelay(500);
@@ -183,13 +240,13 @@ export async function getCarById(id) {
 }
 
 export async function getFeaturedCars(limit = 12) {
-  const cars = await getCars({ featured: true });
+  const cars = await getCars({ status: CAR_STATUS.AVAILABLE, featured: true });
   return cars.slice(0, limit);
 }
 
 export async function getSimilarCars(car, limit = 4) {
   if (!car) return [];
-  const all = await getCars();
+  const all = await getAvailableCars();
   return all
     .filter((c) => c._id !== car._id)
     .map((c) => ({
@@ -204,6 +261,29 @@ export async function getSimilarCars(car, limit = 4) {
     .map((x) => x.car);
 }
 
+export async function getDashboardStats() {
+  if (API_ENABLED) {
+    const { data } = await api.get('/api/admin/stats/dashboard');
+    return data?.data;
+  }
+  if (import.meta.env.DEV) {
+    const CARS = await loadMockCars();
+    await mockDelay(300);
+    const available = CARS.filter((c) => (c.status || CAR_STATUS.AVAILABLE) === CAR_STATUS.AVAILABLE).length;
+    const sold = CARS.filter((c) => c.status === CAR_STATUS.SOLD).length;
+    const upcoming = CARS.filter((c) => c.status === CAR_STATUS.UPCOMING).length;
+    return {
+      totalCars: CARS.length,
+      available,
+      sold,
+      upcoming,
+      totalInquiries: 0,
+      totalReviews: 0,
+    };
+  }
+  return null;
+}
+
 // Admin-only mutations. In live mode they send multipart/form-data so image
 // files stream through to Cloudinary on the backend.
 export async function createCar(payload) {
@@ -212,7 +292,7 @@ export async function createCar(payload) {
     return mapCarFromApi(data?.data);
   }
   await mockDelay();
-  return { ...payload, images: payload.images || [], _id: `cj-${Date.now()}` };
+  return { ...payload, status: payload.status || CAR_STATUS.AVAILABLE, images: payload.images || [], _id: `cj-${Date.now()}` };
 }
 
 export async function updateCar(id, payload) {
@@ -222,6 +302,15 @@ export async function updateCar(id, payload) {
   }
   await mockDelay();
   return { ...payload, images: payload.images || [], _id: id };
+}
+
+export async function updateCarStatus(id, status) {
+  if (API_ENABLED) {
+    const { data } = await api.patch(`/api/cars/${id}/status`, { status });
+    return mapCarFromApi(data?.data);
+  }
+  await mockDelay(200);
+  return { _id: id, status };
 }
 
 export async function deleteCar(id) {

@@ -1,12 +1,12 @@
 /**
  * SINGLE SOURCE OF TRUTH for all vehicle data.
- *
- * Components NEVER import this file directly — they go through `services/`
  * (getCars, getCarById). When the Express API is ready, the service layer
  * swaps the import for an HTTP call and nothing else in the app changes.
  *
  * Each record mirrors the shape we expect from MongoDB (note the `_id`).
  */
+
+import { CAR_STATUS } from '../constants';
 
 const img = (id, w = 1400) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
@@ -386,4 +386,12 @@ const CARS = [
   },
 ];
 
-export default CARS;
+// Default all mock listings to AVAILABLE; mark a few for dev preview of sold/upcoming sections.
+const CARS_WITH_STATUS = CARS.map((car, index) => ({
+  ...car,
+  status:
+    car.status ||
+    (index === 8 || index === 9 ? CAR_STATUS.SOLD : index === 10 ? CAR_STATUS.UPCOMING : CAR_STATUS.AVAILABLE),
+}));
+
+export default CARS_WITH_STATUS;

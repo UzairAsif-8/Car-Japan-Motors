@@ -4,18 +4,21 @@ import { PlusCircle, Search, Pencil, Trash2, Star } from 'lucide-react';
 import AdminTable from '../../components/admin/AdminTable';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
+import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/ui/Modal';
 import { Skeleton } from '../../components/ui/Skeleton';
 import useAsync from '../../hooks/useAsync';
-import { getCars, deleteCar } from '../../services/carService';
+import { getAdminCars, deleteCar, updateCarStatus } from '../../services/carService';
+import { CAR_STATUS, CAR_STATUS_OPTIONS } from '../../constants';
 import { formatPrice, formatMileage } from '../../lib/format';
 
 export default function AdminCars() {
-  const { data, loading } = useAsync(() => getCars(), []);
+  const { data, loading } = useAsync(() => getAdminCars(), []);
   const [cars, setCars] = useState([]);
   const [query, setQuery] = useState('');
   const [toDelete, setToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(null);
 
   useEffect(() => {
     if (data) setCars(data);
@@ -26,6 +29,19 @@ export default function AdminCars() {
     const q = query.toLowerCase();
     return cars.filter((c) => c.name.toLowerCase().includes(q) || c.make.toLowerCase().includes(q));
   }, [cars, query]);
+
+  const handleStatusChange = async (car, nextStatus) => {
+    if (car.status === nextStatus) return;
+    setStatusUpdating(car._id);
+    try {
+      const updated = await updateCarStatus(car._id, nextStatus);
+      setCars((prev) =>
+        prev.map((c) => (c._id === car._id ? { ...c, ...updated, status: nextStatus } : c))
+      );
+    } finally {
+      setStatusUpdating(null);
+    }
+  };
 
   const confirmDelete = async () => {
     setDeleting(true);
@@ -91,6 +107,30 @@ export default function AdminCars() {
                 key: 'bodyType',
                 header: 'Type',
                 render: (r) => <Badge tone="neutral">{r.bodyType}</Badge>,
+              },
+              {
+                key: 'status',
+                header: 'Status',
+                render: (r) => (
+                  <div className="min-w-[140px] space-y-2">
+                    <StatusBadge status={r.status || CAR_STATUS.AVAILABLE} />
+                    <div className="flex flex-wrap gap-1">
+                      {CAR_STATUS_OPTIONS.filter((o) => o.value !== (r.status || CAR_STATUS.AVAILABLE)).map(
+                        (o) => (
+                          <button
+                            key={o.value}
+                            type="button"
+                            disabled={statusUpdating === r._id}
+                            onClick={() => handleStatusChange(r, o.value)}
+                            className="rounded-lg border border-ink-100 px-2 py-1 text-[11px] font-semibold text-ink-500 transition-colors hover:border-ink-300 hover:bg-ink-50 hover:text-ink disabled:opacity-50"
+                          >
+                            Mark {o.label}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ),
               },
               {
                 key: 'price',

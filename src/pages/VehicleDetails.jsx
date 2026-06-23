@@ -27,6 +27,7 @@ import SectionHeading from '../components/ui/SectionHeading';
 import useAsync from '../hooks/useAsync';
 import { getCarById, getSimilarCars } from '../services/carService';
 import { formatMileage } from '../lib/format';
+import { CAR_STATUS } from '../constants';
 
 export default function VehicleDetails() {
   const { id } = useParams();
@@ -56,6 +57,8 @@ export default function VehicleDetails() {
       </PageTransition>
     );
   }
+
+  const status = car.status || CAR_STATUS.AVAILABLE;
 
   const specs = [
     { icon: Calendar, label: 'Year', value: car.year },
@@ -88,7 +91,11 @@ export default function VehicleDetails() {
                 <Badge tone="brand">{car.make}</Badge>
                 <Badge tone="neutral">{car.bodyType}</Badge>
                 {car.condition === 'Imported' && <Badge tone="dark">Imported</Badge>}
-                {car.featured && <Badge tone="success" icon={Sparkles}>Featured</Badge>}
+                {car.featured && status === CAR_STATUS.AVAILABLE && (
+                  <Badge tone="success" icon={Sparkles}>Featured</Badge>
+                )}
+                {status === CAR_STATUS.SOLD && <Badge tone="danger">SOLD</Badge>}
+                {status === CAR_STATUS.UPCOMING && <Badge tone="warning">COMING SOON</Badge>}
               </div>
 
               <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">

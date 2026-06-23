@@ -7,7 +7,7 @@ import prisma from '../config/db.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import { uploadImages, destroyByUrl } from '../services/cloudinary.service.js';
-import { mapCarToApi, mapCarFromApi, parseStringArray, toBool } from '../utils/carMapper.js';
+import { mapCarToApi, mapCarFromApi, parseStringArray, toBool, CAR_STATUSES } from '../utils/carMapper.js';
 
 /* ── helpers ─────────────────────────────────────────────── */
 
@@ -69,17 +69,23 @@ function buildCarData(body, { partial = false } = {}) {
 
 /* ── public ──────────────────────────────────────────────── */
 
-// GET /api/cars  — supports filters: ?search&bodyType&fuelType&transmission&minPrice&maxPrice&featured&sold&sort
+// GET /api/cars  — supports filters: ?search&bodyType&fuelType&transmission&minPrice&maxPrice&featured&status&sold&sort
 export const getCars = asyncHandler(async (req, res) => {
-  const { search, bodyType, fuelType, transmission, minPrice, maxPrice, featured, sold, sort } = req.query;
+  const { search, bodyType, fuelType, transmission, minPrice, maxPrice, featured, status, sold, sort } = req.query;
 
   const where = {};
   if (bodyType) where.bodyType = bodyType;
   if (fuelType) where.fuelType = fuelType;
   if (transmission) where.transmission = transmission;
   if (featured !== undefined) where.isFeatured = toBool(featured);
-  // By default hide sold cars from the public list unless explicitly requested.
-  if (sold !== undefined) where.isSold = toBool(sold);
+
+  // Status filter — `status` takes precedence; `sold` is a legacy alias.
+  if (status) {
+    const normalized = String(status).toUpperCase();
+    if (CAR_STATUSES.includes(normalized)) where.status = normalized;
+  } else if (sold !== undefined) {
+    where.status = toBool(sold) ? 'SOLD' : 'AVAILABLE';
+  }
 
   if (minPrice || maxPrice) {
     where.price = {};
@@ -173,4 +179,22 @@ export const deleteCar = asyncHandler(async (req, res) => {
   await Promise.all((existing.images || []).map(destroyByUrl));
 
   res.json({ success: true, message: 'Car deleted' });
+});
+
+// PATCH /api/cars/:id/status  (admin) — quick status change from the dashboard table.
+export const updateCarStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const status = String(req.body?.status || '').toUpperCase();
+
+  if (!CAR_STATUSES.includes(status)) {
+    throw ApiError.badRequest('Invalid status', {
+      status: `Must be one of: ${CAR_STATUSES.join(', ')}`,
+    });
+  }
+
+  const existing = await prisma.car.findUnique({ where: { id } });
+  if (!existing) throw ApiError.notFound('Car not found');
+
+  const car = await prisma.car.update({ where: { id }, data: { status } });
+  res.json({ success: true, data: mapCarToApi(car) });
 });

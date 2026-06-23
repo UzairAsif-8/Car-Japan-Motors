@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, Gauge, Fuel, Cog, ArrowUpRight, MessageCircle } from 'lucide-react';
 import Image from './ui/Image';
 import Badge from './ui/Badge';
-import { buildWhatsAppLink } from '../constants';
+import { buildWhatsAppLink, CAR_STATUS } from '../constants';
 import { formatPrice, formatMileage, cn } from '../lib/format';
 
 /**
@@ -16,6 +16,10 @@ export default function VehicleCard({ car, index = 0, layout = 'grid' }) {
   const [hovered, setHovered] = useState(false);
   const timer = useRef(null);
   const images = car.images?.length ? car.images : [car.image];
+  const status = car.status || CAR_STATUS.AVAILABLE;
+  const isAvailable = status === CAR_STATUS.AVAILABLE;
+  const isSold = status === CAR_STATUS.SOLD;
+  const isUpcoming = status === CAR_STATUS.UPCOMING;
 
   useEffect(() => {
     if (hovered && images.length > 1) {
@@ -35,7 +39,17 @@ export default function VehicleCard({ car, index = 0, layout = 'grid' }) {
   )}. Is it available?`;
 
   if (layout === 'list') {
-    return <VehicleListCard car={car} index={index} waMessage={waMessage} />;
+    return (
+      <VehicleListCard
+        car={car}
+        index={index}
+        waMessage={waMessage}
+        status={status}
+        isAvailable={isAvailable}
+        isSold={isSold}
+        isUpcoming={isUpcoming}
+      />
+    );
   }
 
   return (
@@ -46,7 +60,10 @@ export default function VehicleCard({ car, index = 0, layout = 'grid' }) {
       transition={{ duration: 0.6, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft card-hover hover:-translate-y-1.5 hover:border-ink-200/80 hover:shadow-card"
+      className={cn(
+        'group relative flex flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-soft card-hover hover:-translate-y-1.5 hover:border-ink-200/80 hover:shadow-card',
+        isSold && 'opacity-[0.97]'
+      )}
     >
       <Link to={`/inventory/${car._id}`} className="relative block aspect-[4/3] overflow-hidden">
         <AnimatePresence mode="sync">
@@ -64,7 +81,8 @@ export default function VehicleCard({ car, index = 0, layout = 'grid' }) {
               className="h-full w-full"
               imgClassName={cn(
                 'transition-transform duration-[1200ms] ease-smooth',
-                hovered ? 'scale-110' : 'scale-100'
+                hovered ? 'scale-110' : 'scale-100',
+                isSold && 'grayscale-[0.35]'
               )}
             />
           </motion.div>
@@ -72,10 +90,26 @@ export default function VehicleCard({ car, index = 0, layout = 'grid' }) {
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/35 via-transparent to-transparent opacity-70" />
 
+        {isSold && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink-900/25">
+            <span className="rounded-2xl border-2 border-white/90 bg-red-600/95 px-6 py-2.5 font-display text-2xl font-extrabold tracking-[0.2em] text-white shadow-lg sm:text-3xl">
+              SOLD
+            </span>
+          </div>
+        )}
+
+        {isUpcoming && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <span className="rounded-2xl border-2 border-white/90 bg-amber-500/95 px-5 py-2 font-display text-lg font-extrabold tracking-[0.15em] text-white shadow-lg sm:text-xl">
+              UPCOMING
+            </span>
+          </div>
+        )}
+
         <div className="absolute left-4 top-4 flex flex-wrap gap-2">
           <Badge tone="light">{car.year}</Badge>
           {car.condition === 'Imported' && <Badge tone="dark">Imported</Badge>}
-          {car.featured && <Badge tone="brand">Featured</Badge>}
+          {car.featured && isAvailable && <Badge tone="brand">Featured</Badge>}
         </div>
 
         {images.length > 1 && (
@@ -116,15 +150,25 @@ export default function VehicleCard({ car, index = 0, layout = 'grid' }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <a
-              href={buildWhatsAppLink(waMessage)}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Enquire on WhatsApp"
-              className="grid h-10 w-10 place-items-center rounded-full bg-[#1faf54]/10 text-[#1faf54] transition-all duration-300 hover:bg-[#1faf54] hover:text-white"
-            >
-              <MessageCircle className="h-[18px] w-[18px]" />
-            </a>
+            {isSold ? (
+              <span className="rounded-full bg-ink-100 px-4 py-2.5 text-xs font-semibold text-ink-500">
+                Vehicle Sold
+              </span>
+            ) : isUpcoming ? (
+              <span className="rounded-full bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-700">
+                Coming Soon
+              </span>
+            ) : (
+              <a
+                href={buildWhatsAppLink(waMessage)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Enquire on WhatsApp"
+                className="grid h-10 w-10 place-items-center rounded-full bg-[#1faf54]/10 text-[#1faf54] transition-all duration-300 hover:bg-[#1faf54] hover:text-white"
+              >
+                <MessageCircle className="h-[18px] w-[18px]" />
+              </a>
+            )}
             <Link
               to={`/inventory/${car._id}`}
               className="grid h-10 w-10 place-items-center rounded-full bg-ink text-white transition-all duration-300 hover:bg-brand"
@@ -139,7 +183,7 @@ export default function VehicleCard({ car, index = 0, layout = 'grid' }) {
   );
 }
 
-function VehicleListCard({ car, index, waMessage }) {
+function VehicleListCard({ car, index, waMessage, isAvailable, isSold, isUpcoming }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -153,11 +197,28 @@ function VehicleListCard({ car, index, waMessage }) {
           src={car.images?.[0]}
           alt={car.name}
           className="h-full w-full"
-          imgClassName="transition-transform duration-[1200ms] group-hover:scale-105"
+          imgClassName={cn(
+            'transition-transform duration-[1200ms] group-hover:scale-105',
+            isSold && 'grayscale-[0.35]'
+          )}
         />
+        {isSold && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink-900/25">
+            <span className="rounded-xl border-2 border-white/90 bg-red-600/95 px-4 py-1.5 font-display text-lg font-extrabold tracking-wider text-white">
+              SOLD
+            </span>
+          </div>
+        )}
+        {isUpcoming && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <span className="rounded-xl border-2 border-white/90 bg-amber-500/95 px-4 py-1.5 font-display text-sm font-extrabold tracking-wider text-white">
+              UPCOMING
+            </span>
+          </div>
+        )}
         <div className="absolute left-4 top-4 flex gap-2">
           <Badge tone="light">{car.year}</Badge>
-          {car.featured && <Badge tone="brand">Featured</Badge>}
+          {car.featured && isAvailable && <Badge tone="brand">Featured</Badge>}
         </div>
       </Link>
 
@@ -181,14 +242,24 @@ function VehicleListCard({ car, index, waMessage }) {
         <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-5">
           <p className="font-display text-2xl font-extrabold text-ink">{formatPrice(car.price)}</p>
           <div className="flex gap-2">
-            <a
-              href={buildWhatsAppLink(waMessage)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#1faf54]/10 px-4 text-sm font-semibold text-[#1faf54] transition-colors hover:bg-[#1faf54] hover:text-white"
-            >
-              <MessageCircle className="h-4 w-4" /> WhatsApp
-            </a>
+            {isSold ? (
+              <span className="inline-flex h-10 items-center rounded-full bg-ink-100 px-4 text-sm font-semibold text-ink-500">
+                Vehicle Sold
+              </span>
+            ) : isUpcoming ? (
+              <span className="inline-flex h-10 items-center rounded-full bg-amber-50 px-4 text-sm font-semibold text-amber-700">
+                Coming Soon
+              </span>
+            ) : (
+              <a
+                href={buildWhatsAppLink(waMessage)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#1faf54]/10 px-4 text-sm font-semibold text-[#1faf54] transition-colors hover:bg-[#1faf54] hover:text-white"
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </a>
+            )}
             <Link
               to={`/inventory/${car._id}`}
               className="inline-flex h-10 items-center gap-1.5 rounded-full bg-ink px-5 text-sm font-semibold text-white transition-colors hover:bg-brand"

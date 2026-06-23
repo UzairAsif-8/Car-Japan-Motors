@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-const KEYS = ['search', 'make', 'model', 'year', 'transmission', 'fuel', 'bodyType', 'minPrice', 'maxPrice', 'sort'];
+const KEYS = ['search', 'make', 'model', 'year', 'transmission', 'fuel', 'bodyType', 'minPrice', 'maxPrice', 'sort', 'status'];
 
 const emptyFilters = KEYS.reduce((acc, k) => ({ ...acc, [k]: '' }), {});
 
@@ -34,6 +34,7 @@ export default function useInventoryFilters() {
   const resetFilters = () => {
     const next = new URLSearchParams();
     if (params.get('sort')) next.set('sort', params.get('sort'));
+    if (params.get('status')) next.set('status', params.get('status'));
     setParams(next, { replace: true });
   };
 

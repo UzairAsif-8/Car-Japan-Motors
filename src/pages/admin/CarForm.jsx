@@ -7,13 +7,13 @@ import Select from '../../components/ui/Select';
 import Button from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { getCarById, createCar, updateCar } from '../../services/carService';
-import { MAKES, TRANSMISSIONS, FUEL_TYPES, BODY_TYPES, YEARS } from '../../constants';
+import { MAKES, TRANSMISSIONS, FUEL_TYPES, BODY_TYPES, YEARS, CAR_STATUS_OPTIONS, CAR_STATUS } from '../../constants';
 
 const blankCar = {
   make: '', customMake: '', model: '', variant: '', year: '', price: '', mileage: '',
   transmission: '', fuel: '', bodyType: '', engine: '', color: '',
   registration: '', drivetrain: '', seats: '', condition: 'Local',
-  featured: false, description: '',
+  featured: false, status: CAR_STATUS.AVAILABLE, description: '',
 };
 
 // Sentinel value for the "add a make that isn't in the list" option.
@@ -47,7 +47,7 @@ export default function CarForm() {
     getCarById(id)
       .then((car) => {
         if (!active) return;
-        reset({ ...blankCar, ...car, featured: car.featured });
+        reset({ ...blankCar, ...car, featured: car.featured, status: car.status || CAR_STATUS.AVAILABLE });
         // If the saved make isn't in the preset list, treat it as a custom make.
         if (car.make && !MAKES.includes(car.make)) {
           setValue('make', CUSTOM_MAKE);
@@ -298,6 +298,15 @@ export default function CarForm() {
               <input type="checkbox" {...register('featured')} className="h-5 w-5 accent-brand" />
             </label>
             <Select label="Condition" placeholder="Select" options={['Local', 'Imported']} className="mt-4" {...register('condition')} />
+            <Select
+              label="Listing Status"
+              required
+              placeholder="Select status"
+              options={CAR_STATUS_OPTIONS}
+              className="mt-4"
+              error={errors.status?.message}
+              {...register('status', { required: 'Required' })}
+            />
           </Panel>
 
           <Button type="submit" size="lg" fullWidth disabled={isSubmitting || saved}
