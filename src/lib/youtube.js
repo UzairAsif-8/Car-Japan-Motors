@@ -20,7 +20,12 @@ export function getYouTubeVideoId(url) {
   return null;
 }
 
-export function getYouTubeEmbedUrl(url) {
-  const id = getYouTubeVideoId(url);
+export function getYouTubeEmbedUrl(urlOrId) {
+  const id = getYouTubeVideoId(urlOrId) || (typeof urlOrId === 'string' && /^[a-zA-Z0-9_-]{11}$/.test(urlOrId) ? urlOrId : null);
   return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+
+export function getYouTubeThumbnailUrl(videoId, quality = 'hqdefault') {
+  if (!videoId) return null;
+  return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
 }

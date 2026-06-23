@@ -22,8 +22,7 @@ export default function FeaturedStory() {
         <img
           src={STORY_IMAGE}
           alt=""
-          loading="eager"
-          fetchPriority="high"
+          loading="lazy"
           decoding="async"
           className="h-full w-full object-cover object-[78%_center] max-md:object-[62%_center]"
         />

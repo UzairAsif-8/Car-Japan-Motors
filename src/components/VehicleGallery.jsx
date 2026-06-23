@@ -42,7 +42,13 @@ export default function VehicleGallery({ images = [], alt = '' }) {
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0"
           >
-            <Image src={images[active]} alt={`${alt} — view ${active + 1}`} className="h-full w-full" />
+            <Image
+              src={images[active]}
+              alt={`${alt} — view ${active + 1}`}
+              className="h-full w-full"
+              loading="eager"
+              fetchPriority="high"
+            />
           </motion.div>
         </AnimatePresence>
 
@@ -79,7 +85,12 @@ export default function VehicleGallery({ images = [], alt = '' }) {
               )}
               aria-label={`View image ${i + 1}`}
             >
-              <Image src={src} alt={`${alt} thumbnail ${i + 1}`} className="h-full w-full" />
+              <Image
+                src={src}
+                alt={`${alt} thumbnail ${i + 1}`}
+                className="h-full w-full"
+                loading="lazy"
+              />
             </button>
           ))}
         </div>
@@ -92,6 +103,8 @@ export default function VehicleGallery({ images = [], alt = '' }) {
               key={active}
               src={images[active]}
               alt={`${alt} — fullscreen ${active + 1}`}
+              loading="lazy"
+              decoding="async"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

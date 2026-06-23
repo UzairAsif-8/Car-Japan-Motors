@@ -270,7 +270,7 @@ export default function CarForm() {
               <div className="mt-4 grid grid-cols-3 gap-2">
                 {media.map((m, i) => (
                   <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-mist-200">
-                    <img src={m.url} alt="" className="h-full w-full object-cover" />
+                    <img src={m.url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     <button
                       type="button"
                       onClick={() => setMedia((p) => p.filter((_, idx) => idx !== i))}

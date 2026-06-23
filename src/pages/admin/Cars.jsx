@@ -90,7 +90,7 @@ export default function AdminCars() {
                 header: 'Vehicle',
                 render: (r) => (
                   <div className="flex items-center gap-3">
-                    <img src={r.images?.[0]} alt="" className="h-12 w-16 shrink-0 rounded-lg object-cover" />
+                    <img src={r.images?.[0]} alt="" loading="lazy" decoding="async" className="h-12 w-16 shrink-0 rounded-lg object-cover" />
                     <div>
                       <p className="flex items-center gap-1.5 font-semibold text-ink">
                         {r.model}

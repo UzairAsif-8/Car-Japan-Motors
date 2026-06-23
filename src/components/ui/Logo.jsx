@@ -49,6 +49,8 @@ export default function Logo({ chip = false, size = 'md', className }) {
           <img
             src="/logo.png"
             alt="Car Japan Motors"
+            loading="eager"
+            decoding="async"
             onError={() => setError(true)}
             className={cn('block object-contain', SIZES[size])}
           />

@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import useAsync from '../hooks/useAsync';
 import { getVideos } from '../services/videoService';
-import { getYouTubeEmbedUrl } from '../lib/youtube';
+import { getYouTubeVideoId } from '../lib/youtube';
+import YouTubeLazyEmbed from '../components/YouTubeLazyEmbed';
 import SectionHeading from '../components/ui/SectionHeading';
 import Reveal from '../components/ui/Reveal';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -12,15 +13,16 @@ import 'swiper/css';
 
 export default function VideoCarousel() {
   const { data: videos, loading } = useAsync(() => getVideos(), []);
+  const [playingId, setPlayingId] = useState(null);
 
   const slides = useMemo(
     () =>
       (videos || [])
         .map((video) => ({
           ...video,
-          embedUrl: getYouTubeEmbedUrl(video.url),
+          videoId: video.videoId || getYouTubeVideoId(video.url),
         }))
-        .filter((video) => video.embedUrl),
+        .filter((video) => video.videoId),
     [videos]
   );
 
@@ -45,24 +47,28 @@ export default function VideoCarousel() {
             <Swiper
               modules={[Autoplay]}
               slidesPerView={1}
+              speed={450}
               loop={slides.length > 1}
-              autoplay={{
-                delay: 3500,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-              }}
+              autoplay={
+                playingId
+                  ? false
+                  : {
+                      delay: 1000,
+                      disableOnInteraction: false,
+                      pauseOnMouseEnter: true,
+                    }
+              }
+              onSlideChange={() => setPlayingId(null)}
               className="overflow-hidden rounded-3xl border border-ink-100 bg-ink shadow-card"
             >
               {slides.map((video) => (
                 <SwiperSlide key={video.id}>
                   <div className="relative aspect-video w-full bg-ink">
-                    <iframe
-                      src={`${video.embedUrl}?rel=0&modestbranding=1`}
+                    <YouTubeLazyEmbed
+                      videoId={video.videoId}
                       title={`YouTube video ${video.videoId}`}
-                      className="absolute inset-0 h-full w-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      loading="lazy"
+                      active={playingId === video.id}
+                      onActivate={() => setPlayingId(video.id)}
                     />
                   </div>
                 </SwiperSlide>

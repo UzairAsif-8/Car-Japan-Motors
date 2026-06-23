@@ -109,7 +109,7 @@ export default function Dashboard() {
                   header: 'Vehicle',
                   render: (r) => (
                     <div className="flex items-center gap-3">
-                      <img src={r.images?.[0]} alt="" className="h-10 w-14 rounded-lg object-cover" />
+                      <img src={r.images?.[0]} alt="" loading="lazy" decoding="async" className="h-10 w-14 rounded-lg object-cover" />
                       <div>
                         <p className="font-semibold text-ink">{r.model}</p>
                         <p className="text-xs text-ink-400">{r.make} · {r.year}</p>
