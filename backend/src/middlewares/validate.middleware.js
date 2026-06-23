@@ -93,3 +93,11 @@ export function validateInquiryStatus(req, _res, next) {
   }
   next();
 }
+
+export function validateVideo(req, _res, next) {
+  const { url } = req.body;
+  const errors = {};
+  if (!isNonEmptyString(url)) errors.url = 'YouTube URL is required';
+  fail(errors);
+  next();
+}

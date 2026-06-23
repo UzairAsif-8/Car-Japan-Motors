@@ -21,6 +21,7 @@ const AdminCars = lazy(() => import('./pages/admin/Cars'));
 const CarForm = lazy(() => import('./pages/admin/CarForm'));
 const Inquiries = lazy(() => import('./pages/admin/Inquiries'));
 const Reviews = lazy(() => import('./pages/admin/Reviews'));
+const Videos = lazy(() => import('./pages/admin/Videos'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 
 export default function App() {
@@ -56,6 +57,7 @@ export default function App() {
               <Route path="cars/:id/edit" element={<CarForm />} />
               <Route path="inquiries" element={<Inquiries />} />
               <Route path="reviews" element={<Reviews />} />
+              <Route path="videos" element={<Videos />} />
               <Route path="settings" element={<Settings />} />
             </Route>
 

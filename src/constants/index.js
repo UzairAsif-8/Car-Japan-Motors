@@ -62,6 +62,7 @@ export const ADMIN_NAV_LINKS = [
   { label: 'Add Vehicle', to: '/admin/cars/new', icon: 'PlusCircle' },
   { label: 'Inquiries', to: '/admin/inquiries', icon: 'MessageSquare' },
   { label: 'Reviews', to: '/admin/reviews', icon: 'Star' },
+  { label: 'YouTube Videos', to: '/admin/videos', icon: 'Youtube' },
   { label: 'Settings', to: '/admin/settings', icon: 'Settings' },
 ];
 

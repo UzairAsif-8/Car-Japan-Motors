@@ -7,6 +7,7 @@ import WhyCarJapan from '../sections/WhyCarJapan';
 import FeaturedStory from '../sections/FeaturedStory';
 import Showroom from '../sections/Showroom';
 import Testimonials from '../sections/Testimonials';
+import VideoCarousel from '../sections/VideoCarousel';
 import CTASection from '../components/CTASection';
 import { getSoldCars, getUpcomingCars } from '../services/carService';
 import { CAR_STATUS } from '../constants';
@@ -38,6 +39,7 @@ export default function Home() {
       <FeaturedStory />
       <WhyCarJapan />
       <Showroom />
+      <VideoCarousel />
       <Testimonials />
       <CTASection />
     </PageTransition>

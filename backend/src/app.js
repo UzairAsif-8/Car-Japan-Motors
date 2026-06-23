@@ -10,6 +10,7 @@ import carRoutes from './routes/car.routes.js';
 import reviewRoutes from './routes/review.routes.js';
 import inquiryRoutes from './routes/inquiry.routes.js';
 import statsRoutes from './routes/stats.routes.js';
+import videoRoutes from './routes/video.routes.js';
 
 import { notFound, errorHandler } from './middlewares/error.middleware.js';
 
@@ -45,6 +46,7 @@ app.use('/api/cars', carRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', inquiryRoutes);
 app.use('/api/admin/stats', statsRoutes);
+app.use('/api/videos', videoRoutes);
 
 /* ───────────────────────────────
    ERROR HANDLING

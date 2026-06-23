@@ -121,3 +121,10 @@ enum InquiryStatus {
   CONTACTED
   CLOSED
 }
+
+/// YouTube video URL managed from the admin CMS and shown on the homepage carousel.
+model Video {
+  id        String   @id @default(cuid())
+  url       String
+  createdAt DateTime @default(now())
+}
