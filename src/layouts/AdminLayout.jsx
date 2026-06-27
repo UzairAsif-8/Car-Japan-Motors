@@ -3,11 +3,13 @@ import { Outlet } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import Drawer from '../components/ui/Drawer';
+import { ToastProvider } from '../contexts/ToastContext';
 
 export default function AdminLayout() {
   const [open, setOpen] = useState(false);
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-mist-200">
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 lg:block">
@@ -36,5 +38,6 @@ export default function AdminLayout() {
         </main>
       </div>
     </div>
+    </ToastProvider>
   );
 }

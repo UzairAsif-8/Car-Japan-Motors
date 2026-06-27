@@ -58,7 +58,7 @@ export default function Hero() {
             Premium Japanese Vehicles · Since 2015
           </motion.span>
 
-          <h1 className="mt-6 min-h-[1.2em] display-1 text-balance">
+          <h1 className="mt-6 min-h-[1.1em] display-1 max-w-full lg:whitespace-nowrap">
             <Typewriter
               options={{
                 strings: TYPEWRITER_STRINGS,
@@ -68,7 +68,7 @@ export default function Hero() {
                 deleteSpeed: 32,
                 pauseFor: 2200,
                 cursor: '|',
-                wrapperClassName: 'hero-metallic-gradient',
+                wrapperClassName: 'hero-metallic-gradient inline-block',
                 cursorClassName: 'hero-metallic-cursor',
               }}
             />

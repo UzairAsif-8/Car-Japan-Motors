@@ -7,6 +7,7 @@ import useAsync from '../../hooks/useAsync';
 import { getInquiries, updateInquiryStatus } from '../../services/inquiryService';
 import { formatDate, cn } from '../../lib/format';
 import { buildWhatsAppLink } from '../../constants';
+import { useToast } from '../../contexts/ToastContext';
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -15,6 +16,7 @@ const FILTERS = [
 ];
 
 export default function Inquiries() {
+  const { showSuccess, showError } = useToast();
   const { data, loading } = useAsync(() => getInquiries(), []);
   const [inquiries, setInquiries] = useState([]);
   const [filter, setFilter] = useState('all');
@@ -23,7 +25,7 @@ export default function Inquiries() {
     if (data) setInquiries(data);
   }, [data]);
 
-  const toggleStatus = (id) => {
+  const toggleStatus = async (id) => {
     let nextStatus = 'contacted';
     setInquiries((prev) =>
       prev.map((i) => {
@@ -32,8 +34,12 @@ export default function Inquiries() {
         return { ...i, status: nextStatus };
       })
     );
-    // Persist (best-effort); UI already updated optimistically.
-    updateInquiryStatus(id, nextStatus).catch(() => {});
+    try {
+      await updateInquiryStatus(id, nextStatus);
+      showSuccess(`Inquiry marked as ${nextStatus}.`);
+    } catch (err) {
+      showError(err.message || 'Failed to update inquiry status.');
+    }
   };
 
   const filtered = filter === 'all' ? inquiries : inquiries.filter((i) => i.status === filter);

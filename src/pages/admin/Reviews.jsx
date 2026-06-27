@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Star, Trash2, Plus, Loader2, CheckCircle2, Quote } from 'lucide-react';
+import { Star, Trash2, Plus, Loader2, Quote } from 'lucide-react';
 import AdminTable from '../../components/admin/AdminTable';
 import Button from '../../components/ui/Button';
 import Input, { Textarea } from '../../components/ui/Input';
@@ -10,13 +10,14 @@ import { Skeleton } from '../../components/ui/Skeleton';
 import useAsync from '../../hooks/useAsync';
 import { getAllReviews, createReview, deleteReview } from '../../services/reviewService';
 import { cn } from '../../lib/format';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function Reviews() {
+  const { showSuccess, showError } = useToast();
   const { data, loading } = useAsync(() => getAllReviews(), []);
   const [reviews, setReviews] = useState([]);
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
-  const [saved, setSaved] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -32,12 +33,15 @@ export default function Reviews() {
   }, [data]);
 
   const onSubmit = async (values) => {
-    const created = await createReview({ ...values, rating });
-    setReviews((prev) => [created, ...prev]);
-    reset();
-    setRating(5);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      const created = await createReview({ ...values, rating });
+      setReviews((prev) => [created, ...prev]);
+      reset();
+      setRating(5);
+      showSuccess('Review published successfully.');
+    } catch (err) {
+      showError(err.message || 'Failed to publish review.');
+    }
   };
 
   const confirmDelete = async () => {
@@ -46,6 +50,9 @@ export default function Reviews() {
       await deleteReview(toDelete.id);
       setReviews((prev) => prev.filter((r) => r.id !== toDelete.id));
       setToDelete(null);
+      showSuccess('Review deleted successfully.');
+    } catch (err) {
+      showError(err.message || 'Failed to delete review.');
     } finally {
       setDeleting(false);
     }
@@ -130,10 +137,10 @@ export default function Reviews() {
             <Button
               type="submit"
               fullWidth
-              disabled={isSubmitting || saved}
-              icon={saved ? CheckCircle2 : isSubmitting ? undefined : Plus}
+              disabled={isSubmitting}
+              icon={isSubmitting ? undefined : Plus}
             >
-              {saved ? 'Published!' : isSubmitting ? (
+              {isSubmitting ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" /> Publishing…
                 </>

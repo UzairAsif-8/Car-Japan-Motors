@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Loader2, CheckCircle2, X, ImagePlus, UploadCloud } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, X, ImagePlus, UploadCloud } from 'lucide-react';
 import Input, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Button from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { getCarById, createCar, updateCar } from '../../services/carService';
 import { MAKES, TRANSMISSIONS, FUEL_TYPES, BODY_TYPES, YEARS, CAR_STATUS_OPTIONS, CAR_STATUS } from '../../constants';
+import { useToast } from '../../contexts/ToastContext';
 
 const blankCar = {
   make: '', customMake: '', model: '', variant: '', year: '', price: '', mileage: '',
@@ -22,6 +23,7 @@ const CUSTOM_MAKE = '__custom__';
 export default function CarForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
   const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(isEdit);
@@ -30,7 +32,6 @@ export default function CarForm() {
   const [highlights, setHighlights] = useState([]);
   const [highlightInput, setHighlightInput] = useState('');
   const [imageInput, setImageInput] = useState('');
-  const [saved, setSaved] = useState(false);
 
   const {
     register,
@@ -123,10 +124,18 @@ export default function CarForm() {
       highlights,
       customMake: undefined,
     };
-    if (isEdit) await updateCar(id, payload);
-    else await createCar(payload);
-    setSaved(true);
-    setTimeout(() => navigate('/admin/cars'), 1100);
+    try {
+      if (isEdit) {
+        await updateCar(id, payload);
+        showSuccess('Vehicle updated successfully.');
+      } else {
+        await createCar(payload);
+        showSuccess('Vehicle created successfully.');
+      }
+      navigate('/admin/cars', { replace: !isEdit });
+    } catch (err) {
+      showError(err.message || 'Failed to save vehicle.');
+    }
   };
 
   if (loading) {
@@ -309,9 +318,9 @@ export default function CarForm() {
             />
           </Panel>
 
-          <Button type="submit" size="lg" fullWidth disabled={isSubmitting || saved}
-            icon={saved ? CheckCircle2 : isSubmitting ? undefined : Save}>
-            {saved ? 'Saved!' : isSubmitting ? (
+          <Button type="submit" size="lg" fullWidth disabled={isSubmitting}
+            icon={isSubmitting ? undefined : Save}>
+            {isSubmitting ? (
               <><Loader2 className="h-5 w-5 animate-spin" /> Saving…</>
             ) : isEdit ? 'Save Changes' : 'Create Vehicle'}
           </Button>

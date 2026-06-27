@@ -6,6 +6,7 @@ import { NAV_LINKS, CONTACT, buildWhatsAppLink } from '../constants';
 import Logo from './ui/Logo';
 import Button from './ui/Button';
 import Drawer from './ui/Drawer';
+import { WhatsAppIcon } from './icons/BrandSocialIcons';
 import { cn } from '../lib/format';
 
 const LEFT_LINKS = NAV_LINKS.slice(0, 2);
@@ -44,13 +45,14 @@ export default function Navbar() {
 
               <span aria-hidden className="mx-0.5 hidden h-6 w-px shrink-0 bg-ink-100 lg:block" />
 
-              <div className="flex items-center gap-1.5">
-                <IconBtn href={CONTACT.phoneHref} label="Call us" icon={Phone} />
-                <IconBtn
+              <div className="flex items-center gap-2">
+                <NavActionBtn href={CONTACT.phoneHref} label="Call us" icon={Phone} variant="phone" />
+                <NavActionBtn
                   href={buildWhatsAppLink()}
-                  label="WhatsApp"
-                  icon={MessageCircle}
+                  label="Chat on WhatsApp"
+                  icon={WhatsAppIcon}
                   external
+                  variant="whatsapp"
                 />
                 <Button
                   to="/inventory"
@@ -81,13 +83,17 @@ export default function Navbar() {
               </div>
             </div>
 
-            <a
-              href={CONTACT.phoneHref}
-              aria-label="Call us"
-              className="absolute inset-y-0 right-0 z-10 my-auto grid h-10 w-10 place-items-center rounded-xl text-ink transition-colors duration-300 hover:bg-ink-50 focus-ring"
-            >
-              <Phone className="h-5 w-5" />
-            </a>
+            <div className="absolute inset-y-0 right-0 z-10 flex items-center gap-2 pr-0.5">
+              <NavActionBtn
+                href={buildWhatsAppLink()}
+                label="Chat on WhatsApp"
+                icon={WhatsAppIcon}
+                external
+                variant="whatsapp"
+                size="sm"
+              />
+              <NavActionBtn href={CONTACT.phoneHref} label="Call us" icon={Phone} variant="phone" size="sm" />
+            </div>
           </div>
         </div>
       </header>
@@ -114,16 +120,45 @@ function NavItem({ link }) {
   );
 }
 
-function IconBtn({ href, label, icon: Icon, external }) {
+const ACTION_VARIANTS = {
+  phone: {
+    btn: 'bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 text-white shadow-[0_8px_22px_-6px_rgba(37,99,235,0.55)] ring-2 ring-sky-100/90 hover:from-sky-500 hover:to-blue-700 hover:shadow-[0_12px_28px_-4px_rgba(37,99,235,0.62)]',
+    icon: 'h-[19px] w-[19px]',
+    stroke: 2.4,
+  },
+  whatsapp: {
+    btn: 'bg-gradient-to-br from-[#25D366] via-[#20bd5a] to-[#128C7E] text-white shadow-[0_8px_22px_-6px_rgba(37,211,102,0.52)] ring-2 ring-emerald-100/90 hover:from-[#2ee06f] hover:to-[#0f7a5c] hover:shadow-[0_12px_28px_-4px_rgba(37,211,102,0.62)]',
+    icon: 'h-5 w-5',
+    pulse: true,
+  },
+};
+
+function NavActionBtn({ href, label, icon: Icon, external, variant, size = 'md' }) {
+  const config = ACTION_VARIANTS[variant];
+  if (!config) return null;
+
+  const dimensions = size === 'sm' ? 'h-10 w-10' : 'h-11 w-11';
+
   return (
     <a
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noreferrer' : undefined}
       aria-label={label}
-      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-ink-500 transition-colors duration-300 hover:bg-ink-50 hover:text-brand focus-ring"
+      title={label}
+      className={cn(
+        'group relative grid shrink-0 place-items-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 focus-ring',
+        dimensions,
+        config.btn
+      )}
     >
-      <Icon className="h-[18px] w-[18px]" />
+      {config.pulse && (
+        <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-[#25D366]/30 opacity-75 group-hover:opacity-0" />
+      )}
+      <Icon
+        className={cn('relative z-[1]', config.icon)}
+        {...(config.stroke ? { strokeWidth: config.stroke } : {})}
+      />
     </a>
   );
 }

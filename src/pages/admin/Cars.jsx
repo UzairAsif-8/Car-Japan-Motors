@@ -11,8 +11,10 @@ import useAsync from '../../hooks/useAsync';
 import { getAdminCars, deleteCar, updateCarStatus } from '../../services/carService';
 import { CAR_STATUS, CAR_STATUS_OPTIONS } from '../../constants';
 import { formatPrice, formatMileage } from '../../lib/format';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function AdminCars() {
+  const { showSuccess, showError } = useToast();
   const { data, loading } = useAsync(() => getAdminCars(), []);
   const [cars, setCars] = useState([]);
   const [query, setQuery] = useState('');
@@ -38,6 +40,10 @@ export default function AdminCars() {
       setCars((prev) =>
         prev.map((c) => (c._id === car._id ? { ...c, ...updated, status: nextStatus } : c))
       );
+      const label = CAR_STATUS_OPTIONS.find((o) => o.value === nextStatus)?.label || nextStatus;
+      showSuccess(`Vehicle marked as ${label}.`);
+    } catch (err) {
+      showError(err.message || 'Failed to update vehicle status.');
     } finally {
       setStatusUpdating(null);
     }
@@ -49,6 +55,9 @@ export default function AdminCars() {
       await deleteCar(toDelete._id);
       setCars((prev) => prev.filter((c) => c._id !== toDelete._id));
       setToDelete(null);
+      showSuccess('Vehicle deleted successfully.');
+    } catch (err) {
+      showError(err.message || 'Failed to delete vehicle.');
     } finally {
       setDeleting(false);
     }

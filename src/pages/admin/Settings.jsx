@@ -1,59 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   Mail,
   Lock,
   Pencil,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
   Eye,
   EyeOff,
   Shield,
   User,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { changeEmail, changePassword } from '../../services/accountService';
-import { cn } from '../../lib/format';
-
-function Toast({ toast, onDismiss }) {
-  useEffect(() => {
-    if (!toast) return undefined;
-    const timer = setTimeout(onDismiss, 4000);
-    return () => clearTimeout(timer);
-  }, [toast, onDismiss]);
-
-  return (
-    <AnimatePresence>
-      {toast && (
-        <motion.div
-          initial={{ opacity: 0, y: 16, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 8, scale: 0.96 }}
-          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className={cn(
-            'fixed bottom-6 right-6 z-50 flex max-w-sm items-start gap-3 rounded-2xl border px-5 py-4 shadow-elevated',
-            toast.type === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-              : 'border-brand/20 bg-brand-50 text-brand-800'
-          )}
-          role="status"
-        >
-          {toast.type === 'success' ? (
-            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-          ) : (
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
-          )}
-          <p className="text-sm font-medium leading-snug">{toast.message}</p>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
 
 function Panel({ title, description, icon: Icon, children }) {
   return (
@@ -74,14 +35,12 @@ function Panel({ title, description, icon: Icon, children }) {
 
 export default function Settings() {
   const { user, bootstrapping, updateSession } = useAuth();
+  const { showSuccess, showError } = useToast();
   const [editingEmail, setEditingEmail] = useState(false);
   const [showCurrentPwEmail, setShowCurrentPwEmail] = useState(false);
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
-  const [emailSaved, setEmailSaved] = useState(false);
-  const [passwordSaved, setPasswordSaved] = useState(false);
-  const [toast, setToast] = useState(null);
 
   const emailForm = useForm({
     defaultValues: { currentPassword: '', currentEmail: '', newEmail: '' },
@@ -109,7 +68,6 @@ export default function Settings() {
   const newPasswordValue = watchPassword('newPassword');
 
   const onEmailSubmit = async (values) => {
-    setEmailSaved(false);
     try {
       const result = await changeEmail({
         currentEmail: values.currentEmail,
@@ -122,16 +80,13 @@ export default function Settings() {
       });
       resetEmail();
       setEditingEmail(false);
-      setEmailSaved(true);
-      setToast({ type: 'success', message: result.message || 'Email updated successfully' });
-      setTimeout(() => setEmailSaved(false), 3000);
+      showSuccess(result.message || 'Email updated successfully.');
     } catch (err) {
-      setToast({ type: 'error', message: err.message });
+      showError(err.message);
     }
   };
 
   const onPasswordSubmit = async (values) => {
-    setPasswordSaved(false);
     try {
       const result = await changePassword({
         currentPassword: values.currentPassword,
@@ -141,11 +96,9 @@ export default function Settings() {
         updateSession({ token: result.token });
       }
       resetPassword();
-      setPasswordSaved(true);
-      setToast({ type: 'success', message: result.message || 'Password updated successfully' });
-      setTimeout(() => setPasswordSaved(false), 3000);
+      showSuccess(result.message || 'Password updated successfully.');
     } catch (err) {
-      setToast({ type: 'error', message: err.message });
+      showError(err.message);
     }
   };
 
@@ -259,13 +212,7 @@ export default function Settings() {
               />
               <div className="flex flex-wrap gap-3 pt-1">
                 <Button type="submit" loading={emailSubmitting} disabled={emailSubmitting}>
-                  {emailSaved ? (
-                    <>
-                      <CheckCircle2 className="h-5 w-5" /> Updated!
-                    </>
-                  ) : (
-                    'Update Email'
-                  )}
+                  Update Email
                 </Button>
                 <Button
                   type="button"
@@ -350,22 +297,12 @@ export default function Settings() {
             </div>
             <div className="pt-1">
               <Button type="submit" loading={passwordSubmitting} disabled={passwordSubmitting}>
-                {passwordSaved ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5" /> Password changed!
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-5 w-5" /> Change Password
-                  </>
-                )}
+                <Lock className="h-5 w-5" /> Change Password
               </Button>
             </div>
           </form>
         </Panel>
       </div>
-
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </div>
   );
 }

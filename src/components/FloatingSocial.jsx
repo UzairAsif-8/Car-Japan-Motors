@@ -1,8 +1,6 @@
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { buildWhatsAppLink, CONTACT, SOCIAL } from '../constants';
-import { InstagramIcon, FacebookIcon, TikTokIcon, YouTubeIcon, WhatsAppIcon } from './icons/BrandSocialIcons';
+import { motion } from 'framer-motion';
+import { SOCIAL } from '../constants';
+import { InstagramIcon, FacebookIcon, TikTokIcon, YouTubeIcon } from './icons/BrandSocialIcons';
 import { cn } from '../lib/format';
 
 const SOCIAL_BUTTONS = [
@@ -41,10 +39,8 @@ const SOCIAL_BUTTONS = [
   },
 ];
 
-/** Floating social + WhatsApp buttons fixed to the bottom-right corner. */
+/** Floating social buttons fixed to the bottom-right corner. */
 export default function FloatingSocial() {
-  const [hint, setHint] = useState(true);
-
   return (
     <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 sm:bottom-7 sm:right-7">
       {SOCIAL_BUTTONS.map(({ key, href, label, className, Icon, delay }) => (
@@ -58,45 +54,11 @@ export default function FloatingSocial() {
           <Icon className="h-7 w-7" />
         </FloatingButton>
       ))}
-
-      <div className="flex items-center gap-3">
-        <AnimatePresence>
-          {hint && (
-            <motion.div
-              initial={{ opacity: 0, x: 12, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 12, scale: 0.9 }}
-              transition={{ delay: 1.2, type: 'spring', stiffness: 260, damping: 22 }}
-              className="relative hidden rounded-2xl bg-white px-4 py-2.5 pr-9 text-sm font-semibold text-ink shadow-card sm:block"
-            >
-              Questions? Chat with us
-              <button
-                type="button"
-                onClick={() => setHint(false)}
-                aria-label="Dismiss"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-300 hover:text-ink"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <FloatingButton
-          href={buildWhatsAppLink(`Hi Car Japan, I'm browsing your inventory and have a question.`)}
-          label={`Chat on WhatsApp ${CONTACT.whatsapp}`}
-          className="bg-[#1faf54] shadow-[0_12px_32px_-8px_rgba(31,175,84,0.65)]"
-          delay={0.8}
-          pulse
-        >
-          <WhatsAppIcon className="h-7 w-7" />
-        </FloatingButton>
-      </div>
     </div>
   );
 }
 
-function FloatingButton({ href, label, className, delay, pulse, children }) {
+function FloatingButton({ href, label, className, delay, children }) {
   return (
     <motion.a
       href={href}
@@ -113,7 +75,6 @@ function FloatingButton({ href, label, className, delay, pulse, children }) {
         className
       )}
     >
-      {pulse && <span className="absolute inset-0 animate-ping rounded-full bg-[#1faf54] opacity-20" />}
       {children}
     </motion.a>
   );

@@ -39,7 +39,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-ink-100 bg-mist-100">
+    <footer className="relative border-t border-ink-100 bg-mist-100">
       <div className="mx-auto max-w-8xl container-px py-16 sm:py-20">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
@@ -109,8 +109,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-ink-100 pt-8 sm:flex-row">
-          <div className="flex flex-col items-center gap-1 sm:items-start">
+        <div className="mt-14 border-t border-ink-100 pt-8">
+          <div className="flex flex-col items-center gap-1 text-center sm:items-start sm:text-left">
             <p className="text-sm text-ink-400">
               © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
             </p>
@@ -126,16 +126,20 @@ export default function Footer() {
               </a>
             </p>
           </div>
-          <div className="flex items-center gap-6 text-sm">
-            <Link to="/privacy" className="text-ink-500 transition-colors hover:text-ink">
-              Privacy Policy
-            </Link>
+
+          <div className="mt-6 border-t border-ink-100/80 pt-5">
             <Link
               to="/admin/login"
-              className="inline-flex items-center gap-1 text-ink-400 transition-colors hover:text-ink"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-500 transition-colors hover:text-brand"
             >
               Admin Login
-              <ArrowUpRight className="h-3.5 w-3.5" />
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/privacy"
+              className="mt-3 block text-sm text-ink-500 transition-colors hover:text-ink"
+            >
+              Privacy Policy
             </Link>
           </div>
         </div>

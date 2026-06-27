@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Youtube, Trash2, Plus, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
+import { Youtube, Trash2, Plus, Loader2, ExternalLink } from 'lucide-react';
 import AdminTable from '../../components/admin/AdminTable';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -10,11 +10,12 @@ import useAsync from '../../hooks/useAsync';
 import { getVideos, createVideo, deleteVideo } from '../../services/videoService';
 import { getYouTubeVideoId } from '../../lib/youtube';
 import { formatDate } from '../../lib/format';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function Videos() {
+  const { showSuccess, showError } = useToast();
   const { data, loading } = useAsync(() => getVideos(), []);
   const [videos, setVideos] = useState([]);
-  const [saved, setSaved] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -30,11 +31,14 @@ export default function Videos() {
   }, [data]);
 
   const onSubmit = async (values) => {
-    const created = await createVideo(values.url);
-    setVideos((prev) => [created, ...prev]);
-    reset();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      const created = await createVideo(values.url);
+      setVideos((prev) => [created, ...prev]);
+      reset();
+      showSuccess('Video added successfully.');
+    } catch (err) {
+      showError(err.message || 'Failed to add video.');
+    }
   };
 
   const confirmDelete = async () => {
@@ -43,6 +47,9 @@ export default function Videos() {
       await deleteVideo(toDelete.id);
       setVideos((prev) => prev.filter((v) => v.id !== toDelete.id));
       setToDelete(null);
+      showSuccess('Video deleted successfully.');
+    } catch (err) {
+      showError(err.message || 'Failed to delete video.');
     } finally {
       setDeleting(false);
     }
@@ -80,8 +87,8 @@ export default function Videos() {
                   getYouTubeVideoId(value) ? true : 'Enter a valid YouTube URL',
               })}
             />
-            <Button type="submit" fullWidth disabled={isSubmitting || saved} icon={saved ? CheckCircle2 : Youtube}>
-              {saved ? 'Video added!' : isSubmitting ? (
+            <Button type="submit" fullWidth disabled={isSubmitting} icon={Youtube}>
+              {isSubmitting ? (
                 <><Loader2 className="h-5 w-5 animate-spin" /> Saving…</>
               ) : (
                 'Add Video'
