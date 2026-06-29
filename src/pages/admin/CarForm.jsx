@@ -97,6 +97,9 @@ export default function CarForm() {
     return () => window.removeEventListener('paste', onPaste);
   }, []);
 
+  const makeValue = watch('make');
+  const makeOptions = [...MAKES, { value: CUSTOM_MAKE, label: '+ Add custom make…' }];
+
   const addHighlight = () => {
     const value = highlightInput.trim();
     if (value) {
@@ -109,10 +112,18 @@ export default function CarForm() {
     // Resolve a custom make typed by the admin into the real make value.
     const make =
       values.make === CUSTOM_MAKE ? (values.customMake || '').trim() : values.make;
+    const model = (values.model || '').trim();
+
+    if (!make || !model) {
+      showError('A required field is missing. Please complete all required fields below.');
+      return;
+    }
+
     const payload = {
       ...values,
       make,
-      name: `${make} ${values.model}`.trim(),
+      model,
+      name: `${make} ${model}`.trim(),
       year: Number(values.year),
       price: Number(values.price),
       mileage: Number(values.mileage),
@@ -138,6 +149,10 @@ export default function CarForm() {
     }
   };
 
+  const onInvalid = () => {
+    showError('A required field is missing. Please complete all required fields below.');
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -146,9 +161,6 @@ export default function CarForm() {
       </div>
     );
   }
-
-  const makeValue = watch('make');
-  const makeOptions = [...MAKES, { value: CUSTOM_MAKE, label: '+ Add custom make…' }];
 
   return (
     <div>
@@ -165,7 +177,7 @@ export default function CarForm() {
         {isEdit ? 'Update the details for this listing.' : 'Create a new listing for your inventory.'}
       </p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 grid gap-6 lg:grid-cols-3">
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="mt-8 grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {/* Basics */}
           <Panel title="Vehicle details">
