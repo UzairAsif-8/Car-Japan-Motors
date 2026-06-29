@@ -24,8 +24,9 @@ import Button from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
 import Reveal from '../components/ui/Reveal';
 import SectionHeading from '../components/ui/SectionHeading';
-import useAsync from '../hooks/useAsync';
+import useVehicles from '../hooks/useVehicles';
 import { getCarById, getSimilarCars } from '../services/carService';
+import VehicleFetchError from '../components/VehicleFetchError';
 import { formatMileage } from '../lib/format';
 import { CAR_STATUS } from '../constants';
 
@@ -33,15 +34,25 @@ export default function VehicleDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data: car, loading, error } = useAsync(() => getCarById(id), [id]);
-  const { data: similar } = useAsync(
+  const { data: car, loading, error, isRetrying, refetch } = useVehicles(() => getCarById(id), [id]);
+  const { data: similar } = useVehicles(
     () => (car ? getSimilarCars(car, 6) : Promise.resolve([])),
     [car?._id]
   );
 
   if (loading) return <DetailsSkeleton />;
 
-  if (error || !car) {
+  if (error) {
+    return (
+      <PageTransition>
+        <div className="mx-auto max-w-8xl container-px py-24">
+          <VehicleFetchError onRetry={refetch} retrying={isRetrying} />
+        </div>
+      </PageTransition>
+    );
+  }
+
+  if (!car) {
     return (
       <PageTransition>
         <div className="grid min-h-[70vh] place-items-center px-6 pt-24 text-center">

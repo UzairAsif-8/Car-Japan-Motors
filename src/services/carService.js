@@ -139,6 +139,29 @@ function buildCarFormData(payload = {}) {
 
 const MULTIPART = { headers: { 'Content-Type': 'multipart/form-data' } };
 
+/** Longer timeout for read requests — Render free tier cold starts can exceed 15s. */
+const VEHICLE_READ_TIMEOUT = 45000;
+
+function parseVehicleListResponse(data) {
+  if (!data || data.success === false) {
+    throw new Error(data?.message || 'Failed to load vehicles');
+  }
+  if (!Array.isArray(data.data)) {
+    throw new Error('Invalid vehicle data received from server');
+  }
+  return data.data.map(mapCarFromApi);
+}
+
+function parseVehicleResponse(data) {
+  if (!data || data.success === false) {
+    throw new Error(data?.message || 'Failed to load vehicle');
+  }
+  if (!data.data) {
+    throw new Error('Vehicle not found');
+  }
+  return mapCarFromApi(data.data);
+}
+
 const applyQuery = (cars, params = {}) => {
   let result = [...cars];
   const {
@@ -201,8 +224,11 @@ const applyQuery = (cars, params = {}) => {
 
 export async function getCars(params = {}) {
   if (API_ENABLED) {
-    const { data } = await api.get('/api/cars', { params: buildApiParams(params) });
-    const cars = (data?.data || []).map(mapCarFromApi);
+    const { data } = await api.get('/api/cars', {
+      params: buildApiParams(params),
+      timeout: VEHICLE_READ_TIMEOUT,
+    });
+    const cars = parseVehicleListResponse(data);
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
       console.debug('[getCars] source=API count=', cars.length);
@@ -216,7 +242,7 @@ export async function getCars(params = {}) {
     console.debug('[getCars] source=MOCK count=', CARS.length);
     return applyQuery(CARS, params);
   }
-  return [];
+  throw new Error('Vehicle API is not configured');
 }
 
 export const getAvailableCars = (params = {}) => getCars({ ...params, status: CAR_STATUS.AVAILABLE });
@@ -226,8 +252,8 @@ export const getAdminCars = () => getCars({ admin: true });
 
 export async function getCarById(id) {
   if (API_ENABLED) {
-    const { data } = await api.get(`/api/cars/${id}`);
-    return mapCarFromApi(data?.data);
+    const { data } = await api.get(`/api/cars/${id}`, { timeout: VEHICLE_READ_TIMEOUT });
+    return parseVehicleResponse(data);
   }
   if (import.meta.env.DEV) {
     const CARS = await loadMockCars();

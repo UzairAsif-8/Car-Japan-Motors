@@ -7,15 +7,16 @@ import Badge from '../../components/ui/Badge';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/ui/Modal';
 import { Skeleton } from '../../components/ui/Skeleton';
-import useAsync from '../../hooks/useAsync';
+import useVehicles from '../../hooks/useVehicles';
 import { getAdminCars, deleteCar, updateCarStatus } from '../../services/carService';
+import VehicleFetchError from '../../components/VehicleFetchError';
 import { CAR_STATUS, CAR_STATUS_OPTIONS } from '../../constants';
 import { formatPrice, formatMileage } from '../../lib/format';
 import { useToast } from '../../contexts/ToastContext';
 
 export default function AdminCars() {
   const { showSuccess, showError } = useToast();
-  const { data, loading } = useAsync(() => getAdminCars(), []);
+  const { data, loading, error, isRetrying, refetch } = useVehicles(() => getAdminCars(), []);
   const [cars, setCars] = useState([]);
   const [query, setQuery] = useState('');
   const [toDelete, setToDelete] = useState(null);
@@ -27,10 +28,11 @@ export default function AdminCars() {
   }, [data]);
 
   const filtered = useMemo(() => {
+    if (error || data == null) return [];
     if (!query) return cars;
     const q = query.toLowerCase();
     return cars.filter((c) => c.name.toLowerCase().includes(q) || c.make.toLowerCase().includes(q));
-  }, [cars, query]);
+  }, [cars, query, error, data]);
 
   const handleStatusChange = async (car, nextStatus) => {
     if (car.status === nextStatus) return;
@@ -68,7 +70,9 @@ export default function AdminCars() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">Vehicles</h1>
-          <p className="mt-1 text-ink-500">{cars.length} vehicles in your inventory.</p>
+          <p className="mt-1 text-ink-500">
+            {error ? 'Unable to load vehicles' : `${cars.length} vehicles in your inventory.`}
+          </p>
         </div>
         <Button to="/admin/cars/new" icon={PlusCircle}>
           Add Vehicle
@@ -87,12 +91,21 @@ export default function AdminCars() {
 
       <div className="mt-6">
         {loading ? (
-          <Skeleton className="h-96 rounded-2xl" />
+          <div>
+            {isRetrying && (
+              <p className="mb-4 text-sm font-medium text-ink-500">
+                Waking up the server… this may take a moment.
+              </p>
+            )}
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+        ) : error ? (
+          <VehicleFetchError onRetry={refetch} retrying={isRetrying} compact />
         ) : (
           <AdminTable
             keyField="_id"
             data={filtered}
-            empty="No vehicles match your search."
+            empty={query ? 'No vehicles match your search.' : 'No vehicles added currently.'}
             columns={[
               {
                 key: 'name',

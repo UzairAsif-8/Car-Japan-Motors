@@ -27,7 +27,8 @@ export default function Home() {
           eyebrow="Recently sold"
           title="Recently sold vehicles"
           description="A glimpse of the premium Japanese vehicles we've recently placed with happy owners."
-          fetcher={() => getSoldCars(8)}
+          fetcher={() => getSoldCars()}
+          limit={8}
           viewAllTo={`/inventory?status=${CAR_STATUS.SOLD}`}
           viewAllLabel="View sold vehicles"
           className="bg-white section-py"
@@ -38,7 +39,8 @@ export default function Home() {
           eyebrow="Coming soon"
           title="Upcoming vehicles"
           description="Exciting arrivals on their way — register your interest early for first access."
-          fetcher={() => getUpcomingCars(8)}
+          fetcher={() => getUpcomingCars()}
+          limit={8}
           viewAllTo={`/inventory?status=${CAR_STATUS.UPCOMING}`}
           viewAllLabel="View upcoming"
           className="bg-mist-100 section-py"

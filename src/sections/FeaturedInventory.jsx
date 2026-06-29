@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { ArrowRight, SearchX } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getCars } from '../services/carService';
-import useAsync from '../hooks/useAsync';
+import useVehicles from '../hooks/useVehicles';
 import VehicleGrid from '../components/VehicleGrid';
+import { VEHICLE_EMPTY_MESSAGE } from '../components/VehicleFetchError';
 import SectionHeading from '../components/ui/SectionHeading';
 import Button from '../components/ui/Button';
 import Reveal from '../components/ui/Reveal';
@@ -11,23 +12,31 @@ import { CAR_STATUS, INVENTORY_STATUS_FILTERS } from '../constants';
 import { cn } from '../lib/format';
 
 const EMPTY_MESSAGES = {
-  '': 'No vehicles.',
-  [CAR_STATUS.AVAILABLE]: 'No available vehicles.',
-  [CAR_STATUS.SOLD]: 'No sold vehicles.',
-  [CAR_STATUS.UPCOMING]: 'No upcoming vehicles.',
+  '': VEHICLE_EMPTY_MESSAGE,
+  [CAR_STATUS.AVAILABLE]: 'No available vehicles added currently.',
+  [CAR_STATUS.SOLD]: 'No sold vehicles added currently.',
+  [CAR_STATUS.UPCOMING]: 'No upcoming vehicles added currently.',
+};
+
+const EMPTY_DESCRIPTIONS = {
+  '': 'Check back soon — our showroom inventory is updated regularly.',
+  [CAR_STATUS.AVAILABLE]: 'Available vehicles will appear here once added.',
+  [CAR_STATUS.SOLD]: 'Sold vehicles will appear here once marked as sold.',
+  [CAR_STATUS.UPCOMING]: 'Upcoming arrivals will appear here once added.',
 };
 
 export default function FeaturedInventory() {
   const [statusFilter, setStatusFilter] = useState('');
-  const { data: cars, loading } = useAsync(() => getCars(), []);
+  const { data: cars, loading, error, isRetrying, refetch } = useVehicles(() => getCars(), []);
 
   const filtered = useMemo(() => {
-    const all = cars || [];
-    if (!statusFilter) return all;
-    return all.filter((c) => (c.status || CAR_STATUS.AVAILABLE) === statusFilter);
+    if (!cars) return [];
+    if (!statusFilter) return cars;
+    return cars.filter((c) => (c.status || CAR_STATUS.AVAILABLE) === statusFilter);
   }, [cars, statusFilter]);
 
   const emptyMessage = EMPTY_MESSAGES[statusFilter] || EMPTY_MESSAGES[''];
+  const emptyDescription = EMPTY_DESCRIPTIONS[statusFilter] || EMPTY_DESCRIPTIONS[''];
 
   return (
     <section className="bg-mist-100 section-py">
@@ -73,21 +82,16 @@ export default function FeaturedInventory() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             >
-              {loading ? (
-                <VehicleGrid cars={[]} loading skeletonCount={6} />
-              ) : filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-ink-200 bg-white px-6 py-20 text-center">
-                  <span className="grid h-16 w-16 place-items-center rounded-2xl bg-mist-100 text-ink-300 shadow-soft">
-                    <SearchX className="h-8 w-8" strokeWidth={1.5} />
-                  </span>
-                  <h3 className="mt-6 font-display text-xl font-bold text-ink">{emptyMessage}</h3>
-                  <p className="mt-2 max-w-sm text-ink-500">
-                    Check back soon — our showroom inventory is updated regularly.
-                  </p>
-                </div>
-              ) : (
-                <VehicleGrid cars={filtered} loading={false} skeletonCount={6} />
-              )}
+              <VehicleGrid
+                cars={filtered}
+                loading={loading}
+                error={error}
+                isRetrying={isRetrying}
+                onRetry={refetch}
+                skeletonCount={6}
+                emptyMessage={emptyMessage}
+                emptyDescription={emptyDescription}
+              />
             </motion.div>
           </AnimatePresence>
         </div>

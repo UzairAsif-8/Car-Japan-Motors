@@ -7,17 +7,20 @@ import Badge from '../../components/ui/Badge';
 import StatusBadge from '../../components/StatusBadge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import useAsync from '../../hooks/useAsync';
+import useVehicles from '../../hooks/useVehicles';
 import { getAdminCars, getDashboardStats } from '../../services/carService';
+import VehicleFetchError from '../../components/VehicleFetchError';
 import { getInquiries } from '../../services/inquiryService';
 import { CAR_STATUS } from '../../constants';
 import { formatPrice } from '../../lib/format';
 
 export default function Dashboard() {
   const { data: stats, loading: statsLoading } = useAsync(() => getDashboardStats(), []);
-  const { data: cars, loading: carsLoading } = useAsync(() => getAdminCars(), []);
+  const { data: cars, loading: carsLoading, error: carsError, isRetrying, refetch: refetchCars } =
+    useVehicles(() => getAdminCars(), []);
   const { data: inquiries, loading: inqLoading } = useAsync(() => getInquiries(), []);
 
-  const carList = cars || [];
+  const carList = cars ?? [];
   const inqList = inquiries || [];
 
   const dashboardStats = [
@@ -98,7 +101,14 @@ export default function Dashboard() {
             </Link>
           </div>
           {carsLoading ? (
-            <Skeleton className="h-64 rounded-2xl" />
+            <div>
+              {isRetrying && (
+                <p className="mb-4 text-sm font-medium text-ink-500">Waking up the server…</p>
+              )}
+              <Skeleton className="h-64 rounded-2xl" />
+            </div>
+          ) : carsError ? (
+            <VehicleFetchError onRetry={refetchCars} retrying={isRetrying} compact />
           ) : (
             <AdminTable
               keyField="_id"

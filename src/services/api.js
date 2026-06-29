@@ -59,11 +59,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const message =
-      error.response?.data?.message ||
-      error.message ||
-      'Something went wrong. Please try again.';
+      error.code === 'ECONNABORTED'
+        ? 'Request timed out. The server may still be starting up.'
+        : error.response?.data?.message ||
+          error.message ||
+          'Something went wrong. Please try again.';
     const err = new Error(message);
     err.status = error.response?.status;
+    err.code = error.code;
     return Promise.reject(err);
   }
 );

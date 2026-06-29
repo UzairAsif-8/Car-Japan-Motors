@@ -8,9 +8,10 @@ import Drawer from '../components/ui/Drawer';
 import Pagination from '../components/ui/Pagination';
 import Button from '../components/ui/Button';
 import useInventoryFilters from '../hooks/useInventoryFilters';
-import useAsync from '../hooks/useAsync';
+import useVehicles from '../hooks/useVehicles';
 import { getCars } from '../services/carService';
 import { SORT_OPTIONS, INVENTORY_STATUS_FILTERS } from '../constants';
+import { VEHICLE_EMPTY_MESSAGE } from '../components/VehicleFetchError';
 import { cn } from '../lib/format';
 
 const PER_PAGE = 9;
@@ -21,7 +22,7 @@ export default function Inventory() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { data: cars, loading } = useAsync(
+  const { data: cars, loading, error, isRetrying, refetch } = useVehicles(
     () => getCars(queryParams),
     [JSON.stringify(queryParams)]
   );
@@ -31,7 +32,15 @@ export default function Inventory() {
     setPage(1);
   }, [JSON.stringify(queryParams)]);
 
-  const list = cars || [];
+  const hasActiveFilters = useMemo(
+    () =>
+      ['search', 'make', 'model', 'year', 'transmission', 'fuel', 'bodyType', 'minPrice', 'maxPrice'].some(
+        (key) => filters[key]
+      ),
+    [filters]
+  );
+
+  const list = cars ?? [];
   const totalPages = Math.ceil(list.length / PER_PAGE);
   const paged = useMemo(
     () => list.slice((page - 1) * PER_PAGE, page * PER_PAGE),
@@ -98,10 +107,14 @@ export default function Inventory() {
                   Filters
                 </Button>
                 <p className="text-sm text-ink-500">
-                  {loading ? 'Loading…' : (
+                  {loading ? (
+                    isRetrying ? 'Waking up server…' : 'Loading…'
+                  ) : error ? (
+                    'Unable to load inventory'
+                  ) : (
                     <>
                       <span className="font-semibold text-ink">{list.length}</span>{' '}
-                      {filters.status ? 'vehicles' : 'vehicles'}
+                      vehicles
                     </>
                   )}
                 </p>
@@ -137,12 +150,16 @@ export default function Inventory() {
             <VehicleGrid
               cars={paged}
               loading={loading}
+              error={error}
+              isRetrying={isRetrying}
+              onRetry={refetch}
               layout={layout}
               skeletonCount={6}
               onReset={resetFilters}
+              emptyMessage={hasActiveFilters ? 'No vehicles match your search' : VEHICLE_EMPTY_MESSAGE}
             />
 
-            {!loading && totalPages > 1 && (
+            {!loading && !error && totalPages > 1 && (
               <div className="mt-12">
                 <Pagination page={page} totalPages={totalPages} onChange={handlePage} />
               </div>
