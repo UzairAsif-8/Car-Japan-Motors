@@ -30,7 +30,7 @@ export default function Navbar() {
               ))}
             </nav>
 
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible">
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible">
               <div className="pointer-events-auto translate-y-1.5 sm:translate-y-2">
                 <Logo size="nav" />
               </div>
@@ -77,7 +77,7 @@ export default function Navbar() {
               <Menu className="h-5 w-5" />
             </button>
 
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible">
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible">
               <div className="pointer-events-auto translate-y-1.5 sm:translate-y-2">
                 <Logo size="nav" />
               </div>

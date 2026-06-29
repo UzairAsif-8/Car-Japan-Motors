@@ -28,13 +28,17 @@ export default function Logo({ chip = false, size = 'md', className }) {
     <Link
       to="/"
       aria-label="Car Japan Motors — home"
-      className={cn('group inline-flex items-center leading-none', className)}
+      className={cn(
+        'group relative z-20 inline-flex shrink-0 items-center justify-center leading-none',
+        'rounded-xl p-1.5 -m-1.5 transition-transform duration-500 hover:scale-[1.02] focus-ring',
+        SIZES[size],
+        className
+      )}
     >
       {error ? (
         <span
           className={cn(
-            'grid aspect-[2.2] place-items-center rounded-xl bg-brand px-4 font-display text-sm font-extrabold leading-none text-white shadow-[0_6px_20px_-6px_rgba(216,30,44,0.55)]',
-            SIZES[size]
+            'pointer-events-none grid aspect-[2.2] h-full w-auto place-items-center rounded-xl bg-brand px-4 font-display text-sm font-extrabold leading-none text-white shadow-[0_6px_20px_-6px_rgba(216,30,44,0.55)]'
           )}
         >
           CJ
@@ -42,17 +46,18 @@ export default function Logo({ chip = false, size = 'md', className }) {
       ) : (
         <span
           className={cn(
-            'inline-flex items-center justify-center transition-transform duration-500 group-hover:scale-[1.02]',
+            'flex h-full w-full items-center justify-center',
             chip && CHIP
           )}
         >
           <img
             src="/logo.png"
-            alt="Car Japan Motors"
+            alt=""
+            aria-hidden
             loading="eager"
             decoding="async"
             onError={() => setError(true)}
-            className={cn('block object-contain', SIZES[size])}
+            className="pointer-events-none block h-full w-auto max-w-full object-contain"
           />
         </span>
       )}
